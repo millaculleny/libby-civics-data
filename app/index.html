@@ -112,7 +112,7 @@ svg{display:block}
 .tile span{font-size:12px;font-weight:800;color:var(--mute);text-transform:uppercase;letter-spacing:.05em}
 .sec{font-size:22px;font-weight:900;margin:6px 0 12px}
 label.l{display:block;font-size:12px;font-weight:900;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin:12px 0 6px}
-input[type=text],input[type=search],select,textarea{width:100%;font:inherit;font-weight:700;color:var(--ink);background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:12px 14px;min-height:50px}
+input[type=text],input[type=search],input[type=password],select,textarea{width:100%;font:inherit;font-weight:700;color:var(--ink);background:var(--soft);border:2px solid var(--line);border-radius:14px;padding:12px 14px;min-height:50px}
 textarea{min-height:84px;resize:vertical}
 .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
 .chip{border:2px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:800;background:var(--card);color:var(--mute)}
@@ -439,8 +439,9 @@ const IC = {
 };
 
 /* ---------- state ---------- */
-const KEY = "libbycivics.v2";
-let S = {style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], onboarded:false};
+let KEY = "libbycivics.v2";
+const freshState = () => ({style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], onboarded:false});
+let S = freshState();
 try { const x = JSON.parse(localStorage.getItem(KEY)||"null"); if (x && x.q) S = Object.assign(S, x); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} if (typeof cloudPush === "function") cloudPush(); }
 const dayStr = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
@@ -658,7 +659,7 @@ function vMe(){
   $("tSound").onclick = e => { S.sound = !S.sound; save(); e.currentTarget.setAttribute("aria-pressed", S.sound); sfx.tap(); };
   $("tTheme").onclick = e => { document.documentElement.setAttribute("data-theme", isDark() ? "light" : "dark"); e.currentTarget.setAttribute("aria-pressed", isDark()); };
   let armed = false;
-  $("reset").onclick = () => { if (!armed){ armed = true; $("reset").textContent = "Tap again to erase everything"; $("resetMsg").textContent = "This removes your XP, streak and progress on this device."; return; } S = {style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], onboarded:false}; save(); render(); onboarding(); };
+  $("reset").onclick = () => { if (!armed){ armed = true; $("reset").textContent = "Tap again to erase everything"; $("resetMsg").textContent = "This removes your XP, streak and progress on this device."; return; } const nm = S.name, stt = S.state; S = freshState(); S.name = nm; S.state = stt; S.onboarded = true; save(); render(); };
 }
 function isDark(){ const t = document.documentElement.getAttribute("data-theme"); return t ? t === "dark" : matchMedia("(prefers-color-scheme: dark)").matches; }
 
@@ -1005,7 +1006,7 @@ document.addEventListener("keydown", e => {
 /* ---------- cloud account (Supabase): optional, keeps progress across devices ---------- */
 const SB = {"url": "https://mixompfmzbdeeewbohij.supabase.co", "anon": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1peG9tcGZtemJkZWVld2JvaGlqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3OTI4NzcsImV4cCI6MjEwOTM2ODg3N30.IHfNZ6i__7sZ1K73SwW17_0snKOLjyxCmUDDSenbWcc"};
 const SBK = "libbycivics.session";
-let SESS = null; try { SESS = JSON.parse(localStorage.getItem(SBK) || "null"); } catch(e){}
+let SESS = null; try { localStorage.removeItem(SBK); } catch(e){}   /* no saved sign-in: the person types login and password every time the app opens */
 let cloudMsg = "", pushT = null;
 async function sbFetch(path, opts){
   opts = opts || {};
@@ -1015,7 +1016,6 @@ async function sbFetch(path, opts){
 }
 function setSess(j){
   SESS = {access_token: j.access_token, refresh_token: j.refresh_token, expires_at: Date.now() + ((j.expires_in || 3600) * 1000) - 60000, user: {id: j.user.id, email: j.user.email}};
-  try { localStorage.setItem(SBK, JSON.stringify(SESS)); } catch(e){}
 }
 async function ensureSess(){
   if (!SB || !SESS) return false;
@@ -1026,15 +1026,20 @@ async function ensureSess(){
     setSess(await r.json()); return true;
   } catch(e){ return false; }
 }
-async function authDo(kind, email, pw){
+async function authDo(kind, email, pw, quiet){
   const path = kind === "up" ? "/auth/v1/signup" : "/auth/v1/token?grant_type=password";
   let r;
   try { r = await sbFetch(path, {method: "POST", headers: {Authorization: "Bearer " + SB.anon}, body: JSON.stringify({email, password: pw})}); }
   catch(e){ throw new Error("Could not reach the server. The account works in the installed app and in the web version."); }
   const j = await r.json().catch(() => ({}));
-  if (!r.ok) throw new Error(j.msg || j.error_description || j.message || j.error || "Could not sign in.");
-  if (!j.access_token) throw new Error("Check your e-mail to confirm the account, then sign in.");
-  setSess(j); await cloudPull();
+  if (!r.ok){
+    const m = String(j.msg || j.error_description || j.message || j.error || "");
+    if (/already|registered/i.test(m)) throw new Error("That login is already taken. Choose another one.");
+    if (/invalid login|invalid credentials/i.test(m)) throw new Error("Wrong login or password.");
+    throw new Error(m || "Could not sign in.");
+  }
+  if (!j.access_token) throw new Error("The account was created but could not sign in. Try Sign in.");
+  setSess(j); if (!quiet) await cloudPull();
 }
 /* merge: never lose progress made on either side */
 function mergeProgress(row){
@@ -1074,27 +1079,86 @@ async function doPush(){
   } catch(e){ cloudMsg = "No connection. Your progress is safe on this device."; }
   const el = $("cloudMsg"); if (el) el.textContent = cloudMsg;
 }
+const MAIL_DOMAIN = "@libertyquiz.app";
+const loginOf = email => String(email || "").replace(MAIL_DOMAIN, "");
+function cleanLogin(v){ return String(v || "").trim().toLowerCase(); }
+function loginErr(v){
+  if (!/^[a-z0-9._-]{3,30}$/.test(v)) return "Your login needs 3 to 30 letters or numbers (no spaces or accents). You can also use . _ -";
+  return "";
+}
 function accountCard(){
-  if (!SB) return "";
-  if (SESS) return '<div class="card" style="margin-top:16px"><b style="font-size:17px;font-weight:900">Your account</b><p style="color:var(--mute);margin-top:4px;overflow-wrap:anywhere">Signed in as ' + esc(SESS.user.email) + '. Your progress follows you to any device.</p><p id="cloudMsg" style="font-size:13px;color:var(--mute);margin-top:6px">' + esc(cloudMsg) + '</p><div class="row" style="margin-top:12px"><button class="btn blue" id="syncNow" type="button">Sync now</button><button class="btn ghost" id="signOut" type="button">Sign out</button></div></div>';
-  return '<div class="card" style="margin-top:16px"><b style="font-size:17px;font-weight:900">Save your progress (optional)</b><p style="color:var(--mute);margin-top:4px">Create a free account to keep your XP, streak and answers on all your devices. You can keep playing without one.</p><label class="l" for="aMail">E-mail</label><input type="text" id="aMail" inputmode="email" autocomplete="email" placeholder="you@example.com"><label class="l" for="aPass">Password (6+ characters)</label><input type="password" id="aPass" autocomplete="current-password" placeholder="Password"><p id="cloudMsg" role="alert" style="font-size:14px;color:var(--red);margin-top:8px"></p><div class="row" style="margin-top:8px"><button class="btn" id="aUp" type="button">Create account</button><button class="btn ghost" id="aIn" type="button">Sign in</button></div></div>';
+  if (!SB || !SESS) return "";
+  return '<div class="card" style="margin-top:16px"><b style="font-size:17px;font-weight:900">Your account</b><p style="color:var(--mute);margin-top:4px;overflow-wrap:anywhere">Signed in as <b>' + esc(loginOf(SESS.user.email)) + '</b>. Your progress is saved to this account.</p><p id="cloudMsg" style="font-size:13px;color:var(--mute);margin-top:6px">' + esc(cloudMsg) + '</p><div class="row" style="margin-top:12px"><button class="btn blue" id="syncNow" type="button">Sync now</button><button class="btn ghost" id="signOut" type="button">Sign out</button></div></div>';
 }
 function wireAccount(){
-  if (!SB) return;
+  if (!SB || !SESS) return;
   const msg = t => { const el = $("cloudMsg"); if (el) el.textContent = t; };
-  if (SESS){
-    $("syncNow").onclick = async () => { msg("Syncing..."); await cloudPull(); msg(cloudMsg); };
-    $("signOut").onclick = () => { SESS = null; try { localStorage.removeItem(SBK); } catch(e){} cloudMsg = ""; vMe(); };
-    return;
-  }
-  const go = kind => async () => {
-    const em = $("aMail").value.trim(), pw = $("aPass").value;
-    if (!/^\S+@\S+\.\S+$/.test(em)) return msg("Type a valid e-mail.");
-    if (pw.length < 6) return msg("The password needs at least 6 characters.");
-    msg("Please wait...");
-    try { await authDo(kind, em, pw); sfx.good(); vMe(); } catch(e){ msg(e.message); }
+  $("syncNow").onclick = async () => { msg("Syncing..."); await cloudPull(); msg(cloudMsg); };
+  $("signOut").onclick = () => signOut();
+}
+function signOut(){
+  clearTimeout(pushT);
+  SESS = null; cloudMsg = ""; KEY = "libbycivics.v2"; S = freshState();
+  loginGate("in");
+}
+/* start working with one account: its own local copy, then merge with the cloud */
+function useAccount(login){
+  KEY = "libbycivics.v2.u." + login;
+  S = freshState();
+  try { const x = JSON.parse(localStorage.getItem(KEY) || "null"); if (x && x.q) S = Object.assign(S, x); } catch(e){}
+}
+
+/* ---------- login gate: shown every time the app opens ---------- */
+function loginGate(mode, msg0){
+  const up = mode === "up";
+  const opts = ["<option value=''>Select where you live</option>"].concat(Object.keys(CAPITALS).map(n => "<option>" + n + "</option>"), ["<option>" + DC + "</option>"], Object.keys(TERRITORIES).map(n => "<option>" + n + "</option>")).join("");
+  $("onb").className = "full";
+  $("onb").innerHTML = '<div class="big" id="onbM" style="width:' + (up ? 96 : 150) + 'px;height:' + (up ? 96 : 150) + 'px"><div id="eggWrap" class="bob">' + mascotImg("egg") + '</div></div><h1 id="onbH">Liberty Quiz</h1>' +
+    '<div class="seg" style="width:100%;max-width:420px;flex:none"><button type="button" id="gIn" aria-pressed="' + !up + '">Sign in</button><button type="button" id="gUp" aria-pressed="' + up + '">Create account</button></div>' +
+    '<div id="onbForm" style="width:100%;max-width:420px">' +
+    (up ? '<label class="l" for="gName">Your first name</label><input type="text" id="gName" maxlength="40" autocomplete="given-name" placeholder="Your first name"><label class="l" for="gState">State or territory</label><select id="gState">' + opts + '</select>' : '') +
+    '<label class="l" for="gLogin">Login</label><input type="text" id="gLogin" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Your login">' +
+    '<label class="l" for="gPass">Password' + (up ? ' (6+ characters)' : '') + '</label><input type="password" id="gPass" autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="Password">' +
+    '<p id="gErr" role="alert" style="color:var(--red);font-weight:800;margin-top:8px">' + esc(msg0 || "") + '</p></div><p id="onbP" class="sub"></p><div class="spacer"></div><button class="btn" id="oGo" type="button">' + (up ? "Create account" : "Sign in") + '</button>';
+  $("onb").hidden = false;
+  $("gIn").onclick = () => loginGate("in"); $("gUp").onclick = () => loginGate("up");
+  const err = t => { $("gErr").textContent = t; };
+  const go = async () => {
+    const login = cleanLogin($("gLogin").value), pw = $("gPass").value;
+    let name = "", st = "";
+    if (up){
+      name = $("gName").value.trim(); st = $("gState").value;
+      if (!name) return err("Type your first name.");
+      if (!st) return err("Choose the state or territory where you live.");
+    }
+    const le = loginErr(login); if (le) return err(le);
+    if (pw.length < 6) return err("The password needs at least 6 characters.");
+    $("oGo").disabled = true; err("Please wait...");
+    try {
+      const email = login + MAIL_DOMAIN;
+      if (up){
+        await authDo("up", email, pw, true);
+        const old = S; useAccount(login); if (!S.q || !Object.keys(S.q).length) S = Object.assign(freshState(), old);
+        S.name = name; S.state = st; S.onboarded = true; save();
+      } else {
+        await authDo("in", email, pw, true);
+        useAccount(login); await cloudPull();
+        S.onboarded = true; if (!S.name) S.name = login;
+      }
+      INTRO_NEW = up; $("onb").hidden = true; nav(); render(); intro();
+    } catch(e){ $("oGo").disabled = false; err(e.message); }
   };
-  $("aUp").onclick = go("up"); $("aIn").onclick = go("in");
+  $("oGo").onclick = go;
+  $("gPass").addEventListener("keydown", e => { if (e.key === "Enter") go(); });
+  $("gLogin").addEventListener("keydown", e => { if (e.key === "Enter") $("gPass").focus(); });
+}
+let INTRO_NEW = true;
+/* the presentation video plays after login / sign-up */
+function intro(){
+  $("onb").className = "full";
+  $("onb").innerHTML = '<div class="big" id="onbM"><div id="eggWrap" class="bob">' + mascotImg("egg") + '</div></div><h1 id="onbH"></h1><p class="sub" id="onbP"></p><div id="onbForm" hidden></div><div class="spacer"></div><button class="btn" id="oGo" type="button" hidden></button>';
+  $("onb").hidden = false;
+  hatch();
 }
 
 /* ---------- onboarding ---------- */
@@ -1115,10 +1179,16 @@ const HATCH_VIDEO = "data:video/mp4;base64,AAAAIGZ0eXBpc29tAAACAGlzb21pc28yYXZjM
 function showHatched(){
   const w = $("onbM"); $("onb").classList.add("flash");
   w.className = "big"; w.innerHTML = '<div id="eggWrap" class="pop bob">' + mascotImg("baby") + '</div>';
-  $("onbH").textContent = "Hi, " + S.name + "! I hatched!";
-  $("onbP").textContent = "I am a Baby Eagle now. Every level you finish helps me grow: baby, kid, teen, adult and finally a warrior eagle with the flag.";
+  if (INTRO_NEW){
+    $("onbH").textContent = "Hi, " + S.name + "! I hatched!";
+    $("onbP").textContent = "I am a Baby Eagle now. Every level you finish helps me grow: baby, kid, teen, adult and finally a warrior eagle with the flag.";
+  } else {
+    w.innerHTML = '<div id="eggWrap" class="pop bob">' + M() + '</div>';
+    $("onbH").textContent = "Welcome back, " + S.name + "!";
+    $("onbP").textContent = "Libby missed you. Let us keep studying for the citizenship test.";
+  }
   const sk = $("skipV"); if (sk) sk.remove();
-  confetti(); sfx.win();
+  if (INTRO_NEW) confetti(); sfx.win();
   $("oGo").disabled = false; $("oGo").hidden = false; $("oGo").textContent = "Start learning";
   $("oGo").onclick = () => { $("onb").hidden = true; $("onb").classList.remove("flash"); render(); };
 }
@@ -1145,9 +1215,8 @@ function hatch(){
   $("onbH").textContent = "Look, something is hatching!";
 }
 
-$("logoImg").src = IMG.logo; nav(); render(); if (!S.onboarded) onboarding();
+$("logoImg").src = IMG.logo; if (SB){ loginGate("in"); } else { nav(); render(); if (!S.onboarded) onboarding(); }
 refreshOfficials();
-if (SB && SESS) cloudPull();
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshOfficials(); });
 setInterval(refreshOfficials, 3600e3);
 </script>
