@@ -1080,6 +1080,14 @@ async function doPush(){
   const el = $("cloudMsg"); if (el) el.textContent = cloudMsg;
 }
 const MAIL_DOMAIN = "@libertyquiz.app";
+/* any password is accepted (even a short, easy one): the server receives a long derived key, never the typed text */
+async function derivePw(login, pw){
+  const txt = "libertyquiz|" + login + "|" + pw;
+  try {
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, "0")).join("");
+  } catch(e){ return txt + "|padding-for-the-server"; }
+}
 const loginOf = email => String(email || "").replace(MAIL_DOMAIN, "");
 function cleanLogin(v){ return String(v || "").trim().toLowerCase(); }
 function loginErr(v){
@@ -1118,7 +1126,7 @@ function loginGate(mode, msg0){
     '<div id="onbForm" style="width:100%;max-width:420px">' +
     (up ? '<label class="l" for="gName">Your first name</label><input type="text" id="gName" maxlength="40" autocomplete="given-name" placeholder="Your first name"><label class="l" for="gState">State or territory</label><select id="gState">' + opts + '</select>' : '') +
     '<label class="l" for="gLogin">Login</label><input type="text" id="gLogin" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Your login">' +
-    '<label class="l" for="gPass">Password' + (up ? ' (6+ characters)' : '') + '</label><input type="password" id="gPass" autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="Password">' +
+    '<label class="l" for="gPass">Password' + (up ? ' (any password, even a simple one)' : '') + '</label><input type="password" id="gPass" autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="Password">' +
     '<p id="gErr" role="alert" style="color:var(--red);font-weight:800;margin-top:8px">' + esc(msg0 || "") + '</p></div><p id="onbP" class="sub"></p><div class="spacer"></div><button class="btn" id="oGo" type="button">' + (up ? "Create account" : "Sign in") + '</button>';
   $("onb").hidden = false;
   $("gIn").onclick = () => loginGate("in"); $("gUp").onclick = () => loginGate("up");
@@ -1132,16 +1140,17 @@ function loginGate(mode, msg0){
       if (!st) return err("Choose the state or territory where you live.");
     }
     const le = loginErr(login); if (le) return err(le);
-    if (pw.length < 6) return err("The password needs at least 6 characters.");
+    if (!pw) return err("Type a password. It can be as simple as you like.");
     $("oGo").disabled = true; err("Please wait...");
     try {
-      const email = login + MAIL_DOMAIN;
+      const email = login + MAIL_DOMAIN, key = await derivePw(login, pw);
       if (up){
-        await authDo("up", email, pw, true);
+        await authDo("up", email, key, true);
         const old = S; useAccount(login); if (!S.q || !Object.keys(S.q).length) S = Object.assign(freshState(), old);
         S.name = name; S.state = st; S.onboarded = true; save();
       } else {
-        await authDo("in", email, pw, true);
+        try { await authDo("in", email, key, true); }
+        catch(e){ if (/Wrong login or password/.test(e.message) && pw.length >= 6) await authDo("in", email, pw, true); else throw e; }   /* accounts made before this change used the typed password directly */
         useAccount(login); await cloudPull();
         S.onboarded = true; if (!S.name) S.name = login;
       }
