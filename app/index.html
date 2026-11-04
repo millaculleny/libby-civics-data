@@ -411,9 +411,9 @@ const STAGE_DEF = [["egg","Egg","Egg"],["baby","Baby Eagle","Baby"],["kid","Kid 
 /* stage rule: Egg before sign-up; after it Libby hatches (Baby) and grows with the Level (XP); the warrior with the flag also needs level 16+ and one passed simulado */
 function stageIdx(){
   if (!S.onboarded) return 0;   /* the egg: only before the person creates a profile */
-  const lv = Math.floor(S.xp / 100) + 1;   /* the same Level shown in the app */
-  let i = lv >= 12 ? 4 : lv >= 8 ? 3 : lv >= 4 ? 2 : 1;   /* hatched = Baby (levels 1-3); Kid 4+; Teen 8+; Adult 12+ */
-  if (lv >= 16 && S.passed >= 1) i = 5;   /* warrior with the flag: level 16+ and one passed simulado */
+  const c = doneLessons();       /* path levels finished */
+  let i = c >= 14 ? 4 : c >= 9 ? 3 : c >= 4 ? 2 : 1;   /* hatched = Baby (finished 0-3 levels); Kid 4+; Teen 9+; Adult 14+ */
+  if (c >= 19 && S.passed >= 1) i = 5;   /* warrior with the flag: 19 of 20 levels and one passed simulado */
   return i;
 }
 const mascotImg = (key, cls) => '<img class="mascot ' + (cls || "") + '" src="' + IMG[key] + '" alt="" draggable="false">';
@@ -447,7 +447,8 @@ function touchStreak(){
   S.days = S.last === dayStr(y) ? S.days + 1 : 1; S.last = t;
 }
 function liveStreak(){ if (!S.last) return 0; const now = new Date(), y = new Date(now); y.setDate(y.getDate()-1); return (S.last === dayStr(now) || S.last === dayStr(y)) ? S.days : 0; }
-const level = () => Math.floor(S.xp / 100) + 1;
+const doneLessons = () => Object.keys(S.done || {}).filter(k => S.done[k]).length;
+const level = () => doneLessons() + 1;   /* same number as the nodes on the path: finished levels + 1 */
 
 /* ---------- sound ---------- */
 let AC = null;
@@ -556,22 +557,23 @@ const lessonOpen = L => !!S.unlockAll || L.id === 0 || !!S.done[LESSONS[L.id - 1
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="currentColor"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
 function vLearn(){
   const tm = totalMastered(), pct = Math.round(tm / 128 * 100), si = stageIdx();
-  const nextId = LESSONS.findIndex(L => mastered(L) < L.qs.length && lessonOpen(L));
+  const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length;
+  const nextId = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
   let h = '<div class="hero2"><div class="m bob">' + M() + '</div><div class="hbody"><h2>Hi, ' + (S.name ? esc(S.name) : "there") + '!</h2><p>' + tm + ' of 128 questions mastered</p><div class="meter"><i style="width:' + Math.max(4, pct) + '%"></i></div><span class="pill">' + IC.star + ' Level ' + level() + ' · ' + STAGE_DEF[si][1] + '</span></div></div>';
   h += '<div class="stages" aria-label="Libby\'s stages">' + STAGE_DEF.map((s, i) => '<div class="stg ' + (i === si ? "cur" : i < si ? "past" : "fut") + '"><span class="sc"><img src="' + IMG[s[0]] + '" alt=""></span><b>' + s[2] + '</b></div>').join("") + '</div>';
   h += '<button class="mock" id="goMock" type="button"><b>Take the simulado</b><span>Speak your answers like the real test</span></button>';
   UNITS.forEach((u, ui) => {
     const done = u.qs.filter(q => S.q[q.n] && S.q[q.n].last === "c").length, n = u.lessons.length, H = 128, W = 100;
     h += '<div class="ubanner" style="background:' + u.color + '"><span><small>UNIT ' + (ui + 1) + '</small>' + esc(u.name) + '</span><b>' + done + "/" + u.qs.length + '</b></div>';
-    const xs = i => i % 2 === 0 ? 27 : 70, cy = i => i * H + 50;
-    let svg = '<svg class="conn" viewBox="0 0 ' + W + " " + (n * H + 14) + '" preserveAspectRatio="none" aria-hidden="true">';
+    const xs = i => i % 2 === 0 ? 27 : 70, cy = i => i * H + 50 + 58;
+    let svg = '<svg class="conn" viewBox="0 0 ' + W + " " + (n * H + 14 + 58) + '" preserveAspectRatio="none" aria-hidden="true">';
     for (let i = 0; i < n - 1; i++) svg += '<path d="M' + xs(i) + " " + cy(i) + " C" + xs(i) + " " + (cy(i) + H * 0.55) + " " + xs(i + 1) + " " + (cy(i + 1) - H * 0.55) + " " + xs(i + 1) + " " + cy(i + 1) + '"/>';
     svg += "</svg>";
-    h += '<div class="upath" style="height:' + (n * H + 14) + 'px">' + svg;
+    h += '<div class="upath" style="height:' + (n * H + 14 + 58) + 'px">' + svg;
     u.lessons.forEach((L, i) => {
-      const full = mastered(L) === L.qs.length, open = lessonOpen(L), cur = L.id === nextId;
+      const full = isDone(L), open = lessonOpen(L), cur = L.id === nextId;
       const st = full ? "done" : open ? (cur ? "cur" : "open") : "locked";
-      h += '<button class="unode ' + st + '" data-l="' + L.id + '" type="button" style="left:calc(' + xs(i) + '% - 42px);top:' + (i * H + 8) + 'px" aria-label="Level ' + (L.id + 1) + ", " + esc(u.name) + (full ? ", mastered" : !open ? ", locked" : "") + '">' +
+      h += '<button class="unode ' + st + '" data-l="' + L.id + '" type="button" style="left:calc(' + xs(i) + '% - 42px);top:' + (i * H + 8 + 58) + 'px" aria-label="Level ' + (L.id + 1) + ", " + esc(u.name) + (full ? ", mastered" : !open ? ", locked" : "") + '">' +
         (cur ? '<span class="sit">' + M() + "</span>" : "") + (full ? IC.check : open ? IC.star : LOCK) + '<span class="lbl">Level ' + (L.id + 1) + "</span></button>";
     });
     h += "</div>";
