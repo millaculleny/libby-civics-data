@@ -381,6 +381,8 @@ input[type=text],input[type=search],input[type=password],select,textarea{border:
 .btnrow{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .btn.navy{background:#14284b;color:#fff;border-bottom-color:#0a1528}
 .btn.gline{background:#fff;color:#c9962b;border:2px solid #e5b84a;border-bottom-width:5px}
+.mkt.lock{background:#3a4166;box-shadow:none;border-bottom-color:#2b3150;opacity:.75}
+.mkt.lock svg{opacity:.7}
 </style>
 
 <div id="app">
@@ -1022,6 +1024,7 @@ function mkGrade(q, said){
   return {ok: hits / (A.length || 1) >= (R.mock === "writing" ? 0.85 : 0.8)};
 }
 function startMock(k){
+  if (!mkOpen(k)) return;
   if (k === "civics"){ startTest("test"); return; }
   const T = MK[k], pool = k === "speaking" ? MK_SPEAK : k === "reading" ? MK_READ.map(t => ({q:t})) : MK_WRITE.map(t => ({q:"Listen and write the sentence you hear.", say:t, a:[t]}));
   const deck = shuffle(pool).slice(0, T.n).map((x, i) => Object.assign({n:i + 1, a:[]}, x));
@@ -1040,10 +1043,11 @@ function recMock(){
   const n = R.asked || 1; S.mock[R.mock] = {c:R.correct, a:R.asked, p:R.passed, pct:Math.round(R.correct / n * 100), best:R.best || 0, d:dayStr(new Date())};
   if (!S.mockXp && MK_KEYS.every(k => S.mock[k])){ S.mockXp = true; S.xp += 50; R.finalXp = 50; }
 }
+function mkOpen(k){ const i = MK_KEYS.indexOf(k); return i === 0 || !!(S.mock[MK_KEYS[i - 1]] && S.mock[MK_KEYS[i - 1]].p); }
 function chooseBlock(){
   const done = MK_KEYS.every(k => S.mock[k]);
-  const tiles = MK_KEYS.map(k => { const m = S.mock[k];
-    return '<button class="mkt" data-mk="' + k + '" type="button">' + (m ? '<span class="ck' + (m.p ? "" : " try") + '">' + CK_SVG + '</span>' : "") + MK_ICON[k] + '<span>' + MK[k].name + '</span>' + (m ? '<small>' + m.pct + '%' + (m.p ? "" : " - try again") + '</small>' : "") + '</button>'; }).join("");
+  const tiles = MK_KEYS.map(k => { const m = S.mock[k], lk = !mkOpen(k);
+    return '<button class="mkt' + (lk ? " lock" : "") + '" data-mk="' + k + '" type="button"' + (lk ? " disabled" : "") + '>' + (m ? '<span class="ck' + (m.p ? "" : " try") + '">' + CK_SVG + '</span>' : "") + (lk ? LOCK_SVG : MK_ICON[k]) + '<span>' + MK[k].name + '</span>' + (m ? '<small>' + m.pct + '%' + (m.p ? "" : " - try again") + '</small>' : lk ? '<small>Pass ' + MK[MK_KEYS[MK_KEYS.indexOf(k) - 1]].name + ' first</small>' : "") + '</button>'; }).join("");
   return '<h2 class="sec">Choose your test</h2><div class="mkgrid">' + tiles + '</div>' +
    '<button class="mkres' + (done ? " open" : "") + '" data-mkres type="button"' + (done ? "" : " disabled") + '>' + (done ? "" : LOCK_SVG) + 'Results</button>' +
    '<p class="mknote">' + (done ? "All 4 tests done. Tap Results to see how you did." : "Complete all 4 tests to unlock your result.") + '</p>';
