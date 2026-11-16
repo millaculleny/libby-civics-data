@@ -383,7 +383,34 @@ input[type=text],input[type=search],input[type=password],select,textarea{border:
 .btn.gline{background:#fff;color:#c9962b;border:2px solid #e5b84a;border-bottom-width:5px}
 .mkt.lock{background:#3a4166;box-shadow:none;border-bottom-color:#2b3150;opacity:.75}
 .mkt.lock svg{opacity:.7}
-</style>
+#evo{position:fixed;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px;overflow:hidden;background:radial-gradient(circle at 50% 40%,#2a3f9e 0%,#15215a 60%,#0b1238 100%);color:#fff;text-align:center;opacity:0;transition:opacity .35s}
+#evo.on{opacity:1}
+#evo h2{position:relative;font-size:clamp(24px,7vw,32px);font-weight:900;letter-spacing:.2px;text-shadow:0 2px 12px rgba(0,0,0,.4)}
+#evo .evp{position:relative;max-width:340px;font-size:16px;font-weight:700;color:#dbe4ff;min-height:44px}
+#evo .rays{position:absolute;left:50%;top:42%;width:160vmax;height:160vmax;margin:-80vmax 0 0 -80vmax;background:repeating-conic-gradient(rgba(255,206,60,0) 0 9deg,rgba(255,206,60,.18) 9deg 18deg);-webkit-mask-image:radial-gradient(circle,#000 0,transparent 55%);mask-image:radial-gradient(circle,#000 0,transparent 55%);animation:evospin 16s linear infinite;opacity:0;transition:opacity .8s}
+#evo.glow .rays{opacity:1}
+@keyframes evospin{to{transform:rotate(360deg)}}
+#evo .evstage{position:relative;width:min(70vw,34vh,300px);aspect-ratio:1}
+#evo .evstage>img{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 8px 20px rgba(0,0,0,.45))}
+#evo .evstage>img[hidden]{display:none}
+#evo .old.charge{animation:evocharge 1.6s ease-in forwards}
+@keyframes evocharge{0%{transform:scale(1);filter:brightness(1)}18%{transform:scale(1.04) rotate(-3deg)}36%{transform:scale(1.08) rotate(4deg);filter:brightness(1.5)}58%{transform:scale(1.13) rotate(-5deg);filter:brightness(2.4)}80%{transform:scale(1.2) rotate(5deg);filter:brightness(6)}100%{transform:scale(1.28);filter:brightness(14) saturate(0)}}
+#evo .new.show{animation:evoborn .95s cubic-bezier(.2,1.5,.4,1) both}
+@keyframes evoborn{0%{transform:scale(.3);opacity:0;filter:brightness(9)}55%{transform:scale(1.2);opacity:1;filter:brightness(1.7)}100%{transform:scale(1);opacity:1;filter:brightness(1)}}
+#evo .flashw{position:absolute;inset:-60vmax;background:#fff;opacity:0;pointer-events:none}
+#evo .flashw.go{animation:evoflash .9s ease-out}
+@keyframes evoflash{0%{opacity:0}22%{opacity:1}100%{opacity:0}}
+#evo .evsp{position:absolute;left:50%;top:50%;width:11px;height:11px;margin:-5px;border-radius:50%;opacity:0;pointer-events:none}
+#evo .evsp.in{transform:translate(var(--x),var(--y));animation:evoin 1.3s ease-in forwards}
+@keyframes evoin{0%{opacity:0;transform:translate(var(--x),var(--y)) scale(.4)}30%{opacity:1}100%{opacity:0;transform:translate(0,0) scale(1.2)}}
+#evo .evsp.out{animation:evoout 1.3s ease-out forwards}
+@keyframes evoout{0%{opacity:1;transform:translate(0,0) scale(1.3)}100%{opacity:0;transform:translate(var(--x),var(--y)) scale(.3)}}
+#evo .evchips{position:relative;display:flex;align-items:center;gap:12px;font-weight:900;font-size:17px}
+#evo .evchips span{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.12);border-radius:999px;padding:6px 14px 6px 6px}
+#evo .evchips span.n{background:linear-gradient(#ffe08a,#ffc41f);color:#5a3d00}
+#evo .evchips img{width:34px;height:34px;object-fit:contain;border-radius:50%;background:rgba(255,255,255,.2)}
+#evo .evchips b{font-size:22px;color:#ffd45a}
+.pwrap{position:relative}.pwrap .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:44px;height:44px;display:grid;place-items:center;border:0;background:transparent;color:var(--mute);border-radius:12px;cursor:pointer}.pwrap .eye:active,.pwrap .eye[aria-pressed=true]{color:var(--blue,#1f6fe5)}</style>
 
 <div id="app">
   <header class="top">
@@ -593,7 +620,7 @@ function nav(){
 }
 function go(t){ TAB = t; nav(); render(); window.scrollTo(0,0); }
 $("navBtns").addEventListener("click", e => { const b = e.target.closest("button"); if (b){ sfx.tap(); go(b.dataset.tab); } });
-function render(){ topbar(); ({learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); }
+function render(){ topbar(); ({learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); checkEvolve(); }
 
 const lessonOpen = L => !!S.unlockAll || L.id === 0 || !!S.done[LESSONS[L.id - 1].id] || mastered(LESSONS[L.id - 1]) >= LESSONS[L.id - 1].qs.length;
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="currentColor"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
@@ -1272,6 +1299,7 @@ function useAccount(login){
   try { const x = JSON.parse(localStorage.getItem(KEY) || "null"); if (x && x.q) S = Object.assign(S, x); } catch(e){}
 }
 
+const EYE = {on:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1.5 12S5.5 5 12 5s10.5 7 10.5 7-4 7-10.5 7S1.5 12 1.5 12z"/><circle cx="12" cy="12" r="3.2"/></svg>', off:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.6 5.1A10 10 0 0 1 12 5c6.5 0 10.5 7 10.5 7a17 17 0 0 1-3.2 4M6.4 6.5C3.4 8.4 1.5 12 1.5 12S5.5 19 12 19c1.6 0 3-.4 4.3-1M3 3l18 18"/><path d="M9.9 9.9a3.2 3.2 0 0 0 4.2 4.2"/></svg>'};
 /* ---------- login gate: shown every time the app opens ---------- */
 function loginGate(mode, msg0){
   const up = mode === "up";
@@ -1282,9 +1310,10 @@ function loginGate(mode, msg0){
     '<div id="onbForm" style="width:100%;max-width:420px">' +
     (up ? '<label class="l" for="gName">Your first name</label><input type="text" id="gName" maxlength="40" autocomplete="given-name" placeholder="Your first name"><label class="l" for="gState">State or territory</label><select id="gState">' + opts + '</select>' : '') +
     '<label class="l" for="gLogin">Login</label><input type="text" id="gLogin" maxlength="30" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Your login">' +
-    '<label class="l" for="gPass">Password' + (up ? ' (any password, even a simple one)' : '') + '</label><input type="password" id="gPass" autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="Password">' +
+    '<label class="l" for="gPass">Password' + (up ? ' (any password, even a simple one)' : '') + '</label><div class="pwrap"><input type="password" id="gPass" style="padding-right:52px" autocomplete="' + (up ? "new-password" : "current-password") + '" placeholder="Password"><button type="button" class="eye" id="gEye" aria-label="Show password" aria-pressed="false">'+EYE.on+'</button></div>' +
     '<p id="gErr" role="alert" style="color:var(--red);font-weight:800;margin-top:8px">' + esc(msg0 || "") + '</p></div><p id="onbP" class="sub"></p><div class="spacer"></div><button class="btn" id="oGo" type="button">' + (up ? "Create account" : "Sign in") + '</button>';
   $("onb").hidden = false;
+  $("gEye").onclick = () => { const p = $("gPass"), show = p.type === "password"; p.type = show ? "text" : "password"; $("gEye").innerHTML = show ? EYE.off : EYE.on; $("gEye").setAttribute("aria-pressed", String(show)); $("gEye").setAttribute("aria-label", show ? "Hide password" : "Show password"); p.focus(); };
   $("gIn").onclick = () => loginGate("in"); $("gUp").onclick = () => loginGate("up");
   const err = t => { $("gErr").textContent = t; };
   const go = async () => {
@@ -1389,6 +1418,58 @@ function hatch(){
   const sk = document.createElement("button"); sk.id = "skipV"; sk.type = "button"; sk.className = "btn ghost"; sk.textContent = "Skip"; sk.style.maxWidth = "200px";
   sk.onclick = () => end(true); $("onb").insertBefore(sk, $("oGo"));
   $("onbH").textContent = "Look, something is hatching!";
+}
+
+/* ---------- evolution scene: Libby grows Baby > Kid > Teen > Adult > Citizen ---------- */
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const REDUCED = () => { try { return matchMedia("(prefers-reduced-motion: reduce)").matches; } catch(e){ return false; } };
+let EVO_BUSY = false;
+function evoSparks(box, mode){
+  for (let i = 0; i < 22; i++){
+    const s = document.createElement("i"), a = Math.random() * 6.283, r = 120 + Math.random() * 90;
+    s.className = "evsp " + mode;
+    s.style.setProperty("--x", Math.cos(a) * r + "px"); s.style.setProperty("--y", Math.sin(a) * r + "px");
+    s.style.animationDelay = (Math.random() * (mode === "in" ? 1.1 : .4)) + "s";
+    s.style.background = ["#ffd45a", "#fff", "#7fb4ff", "#ff9c1a"][i % 4];
+    box.appendChild(s); setTimeout(() => s.remove(), 2400);
+  }
+}
+async function playEvolution(from, to){
+  EVO_BUSY = true;
+  const el = document.createElement("div"); el.id = "evo"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Libby is evolving");
+  document.body.appendChild(el); void el.offsetWidth; el.classList.add("on");
+  const fast = REDUCED();
+  for (let k = from + 1; k <= to; k++){
+    const old = STAGE_DEF[k - 1], nw = STAGE_DEF[k], last = k === to;
+    el.classList.remove("glow");
+    el.innerHTML = '<div class="rays"></div><h2 id="evH">Something is happening...</h2><div class="evstage" id="evS"><img class="old" src="' + IMG[old[0]] + '" alt=""><img class="new" src="' + IMG[nw[0]] + '" alt="" hidden><div class="flashw"></div></div><div class="evchips" id="evC" style="visibility:hidden"><span><img src="' + IMG[old[0]] + '" alt="">' + old[2] + '</span><b>&rarr;</b><span class="n"><img src="' + IMG[nw[0]] + '" alt="">' + nw[2] + '</span></div><p class="evp" id="evP"></p><button class="btn gline" id="evOk" type="button" style="visibility:hidden;max-width:320px">' + (last ? "Awesome!" : "Next") + '</button>';
+    const S_ = $("evS"), oldI = S_.querySelector(".old"), newI = S_.querySelector(".new"), fl = S_.querySelector(".flashw");
+    el.classList.add("glow");
+    [262, 330, 392, 494, 587, 698, 880].forEach((f, i) => tone(f, .22, "triangle", i * .2));
+    if (!fast){ evoSparks(S_, "in"); oldI.classList.add("charge"); }
+    await sleep(fast ? 300 : 1600);
+    fl.classList.add("go"); sfx.win();
+    await sleep(fast ? 50 : 260);
+    oldI.hidden = true; newI.hidden = false; newI.classList.add("show");
+    $("evH").textContent = last && k === 5 ? "Libby is a Citizen!" : "Libby evolved!";
+    $("evP").textContent = last && k === 5 ? "You learned it all. Now go ace the real test!" : "She is now a " + nw[1] + ". Keep learning to see her grow again.";
+    $("evC").style.visibility = "visible"; confetti(); if (!fast) evoSparks(S_, "out");
+    await sleep(fast ? 100 : 900);
+    const ok = $("evOk"); ok.style.visibility = "visible";
+    await new Promise(res => { ok.onclick = res; });
+  }
+  el.classList.remove("on"); await sleep(fast ? 10 : 350); el.remove(); EVO_BUSY = false;
+}
+/* called after every screen draw: if the stage grew since the last time we looked, play the scene once */
+function checkEvolve(){
+  if (EVO_BUSY || !S.onboarded || !S.hatched) return;
+  const si = stageIdx();
+  if (typeof S.stageSeen !== "number"){ S.stageSeen = si; save(); return; }
+  if (si < S.stageSeen){ S.stageSeen = si; save(); return; }
+  if (si === S.stageSeen) return;
+  if (($("onb") && !$("onb").hidden) || ($("run") && !$("run").hidden) || ($("res") && !$("res").hidden)) return;
+  const from = S.stageSeen; S.stageSeen = si; save();
+  playEvolution(from, si);
 }
 
 $("logoImg").src = IMG.logo; if (SB){ loginGate("in"); } else { nav(); render(); if (!S.onboarded) onboarding(); else { S.hatched = true; intro(); } }
