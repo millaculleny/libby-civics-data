@@ -334,7 +334,7 @@ body.onhome #view{padding:10px 10px 12px}
 .hv-ico{display:flex;gap:8px}
 .hv-ib{display:grid;place-items:center;width:44px;height:44px;border-radius:50%;border:2px solid var(--gold);background:linear-gradient(#2a64c9,#173f8f);color:#ffd23c;box-shadow:0 3px 8px rgba(0,0,0,.35);cursor:pointer;padding:0}
 .hv-ib svg{width:24px;height:24px}
-.hv-body{display:grid;gap:12px;grid-template-columns:minmax(220px,30%) minmax(0,1fr);grid-template-areas:"libby cards" "evo evo" "skills skills";align-items:start}
+.hv-body{display:grid;gap:12px;grid-template-columns:minmax(220px,30%) minmax(0,1fr);grid-template-areas:"libby cards" "evo evo" "mis skills";align-items:start}
 .hv-body>*{min-width:0}.hv-card{min-width:0;max-width:100%}
 .hv-libby{grid-area:libby;text-align:center;align-self:end}
 .hv-fl{width:min(100%,300px);aspect-ratio:1;margin:0 auto;filter:drop-shadow(0 14px 14px rgba(0,0,0,.4));animation:hmfloat 3.4s ease-in-out infinite}
@@ -368,7 +368,7 @@ body.onhome #view{padding:10px 10px 12px}
 .hv-skills{grid-area:skills;background:linear-gradient(#173f8f,#0f2c6b);border:3px solid #ffd23c;border-radius:22px;padding:10px 10px 12px;box-shadow:0 8px 16px rgba(0,0,0,.3)}
 .hv-skills h4{margin:0 0 8px;text-align:center;font-size:16px;font-weight:900;color:#fff;display:flex;align-items:center;justify-content:center;gap:8px}
 .hv-skills h4 svg{width:22px;height:22px}
-.hv-sk{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.hv-sk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 .hv-sk button{position:relative;display:grid;place-items:center;gap:4px;padding:8px 4px 6px;border-radius:16px;border:2px solid #7fb0ff;background:linear-gradient(#2f6fd8,#1a4fc0);color:#fff;font-weight:900;font-size:12px;line-height:1.1;box-shadow:0 4px 0 #0d2252;cursor:pointer;min-height:84px}
 .hv-sk button svg{width:38px;height:38px}
 .hv-sk .soon,.hv-bar .soon{position:absolute;top:3px;right:3px;font-size:9px;font-weight:900;background:#ffd23c;color:#5a3d00;border-radius:99px;padding:1px 5px}
@@ -380,7 +380,7 @@ body.onhome #view{padding:10px 10px 12px}
  .hv-top{grid-template-columns:1fr auto;grid-template-areas:"logo ico" "lvl chips"}
  .hv-lvl{min-width:0}
  .hv-logo{grid-area:logo}.hv-lvl{grid-area:lvl}.hv-ico{grid-area:ico}.hv-chips{grid-area:chips;justify-content:flex-start}
- .hv-body{grid-template-columns:minmax(0,1fr);grid-template-areas:"libby" "cards" "evo" "skills"}
+ .hv-body{grid-template-columns:minmax(0,1fr);grid-template-areas:"libby" "cards" "evo" "mis" "skills"}
  .hv-libby{margin-bottom:-6px}.hv-fl{width:min(46%,180px)}
  .hv-cards{grid-template-columns:minmax(0,1fr)}
  .hv-card{min-height:232px}
@@ -389,12 +389,30 @@ body.onhome #view{padding:10px 10px 12px}
  .hv-top{grid-template-columns:1fr auto;grid-template-areas:"logo ico" "lvl lvl" "chips chips"}.hv-chips{gap:6px}
  .hv-lvl .t{font-size:14px}.hv-lvl .t i{margin:4px 0}
  .hv-ico .hv-ib{width:38px;height:38px}.hv-ico .hv-ib svg{width:20px;height:20px}.hv-ico{gap:5px}
- .hv-sk{grid-template-columns:repeat(5,1fr);gap:5px}.hv-sk button{font-size:10.5px;padding:6px 2px;min-height:76px}.hv-sk button svg{width:32px;height:32px}
+ .hv-sk{grid-template-columns:repeat(3,1fr);gap:6px}.hv-sk button{font-size:10.5px;padding:6px 2px;min-height:76px}.hv-sk button svg{width:32px;height:32px}
  .hv-sk .soon,.hv-bar .soon{font-size:0;width:11px;height:11px;padding:0;top:3px;right:6px;border:1.5px solid #fff}
  .hv-bar button{font-size:10.5px}.hv-bar button svg{width:34px;height:34px}
  .hv-chip{font-size:14px}.hv-logo{font-size:18px}.hv-logo img{width:38px;height:38px}
 }
 @media (prefers-reduced-motion:reduce){.hv-fl{animation:none}}
+/* ---------- home: next-evolution goal, daily mission card, swipe hint ---------- */
+.hv-goal{margin:4px auto 0;max-width:230px;background:rgba(10,30,70,.78);border:2px solid #ffd23c;border-radius:14px;padding:5px 10px;font-weight:900;font-size:13px;line-height:1.25;text-shadow:0 1px 0 #0d2252}
+.hv-goal i{display:block;height:7px;border-radius:7px;background:#0d2252;margin-top:5px;overflow:hidden}
+.hv-goal i em{display:block;height:100%;background:linear-gradient(#ffe27a,#f2a900);border-radius:7px}
+.hv-mis{grid-area:mis;background:linear-gradient(#173f8f,#0f2c6b);border:3px solid #ffd23c;border-radius:22px;padding:10px 12px 12px;box-shadow:0 8px 16px rgba(0,0,0,.3);display:grid;gap:6px;align-content:start}
+.hv-mis h4{margin:0;font-size:15px;font-weight:900;color:#ffd23c;display:flex;align-items:center;gap:8px}
+.hv-mis b{font-size:15px;line-height:1.25}
+.hv-mis .bar{height:9px;border-radius:9px;background:#0d2252;overflow:hidden}
+.hv-mis .bar i{display:block;height:100%;background:linear-gradient(#ffe27a,#f2a900);border-radius:9px}
+.hv-mis .row1{display:flex;justify-content:space-between;gap:8px;font-weight:800;font-size:13px;color:#bcd0ff}
+.hv-mis button{border:0;border-radius:14px;padding:9px 14px;font-weight:900;color:#fff;background:linear-gradient(#6ee05b,#26a63a);border-bottom:4px solid #1b7a2b;cursor:pointer;margin-top:2px}
+.hv-mis button.claim{background:linear-gradient(#ffd23c,#f2a900);color:#4a3200;border-bottom-color:#b97b00}
+.hv-evo .stages.fade-r{-webkit-mask-image:linear-gradient(90deg,#000 84%,transparent);mask-image:linear-gradient(90deg,#000 84%,transparent)}
+.hv-evo .stages.fade-l{-webkit-mask-image:linear-gradient(270deg,#000 84%,transparent);mask-image:linear-gradient(270deg,#000 84%,transparent)}
+.hv-evo .stages.fade-l.fade-r{-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 84%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 84%,transparent)}
+@media (max-width:520px){.hv-goal{font-size:12px;max-width:210px;padding:3px 10px;margin-top:2px}.hv-goal i{height:5px;margin-top:3px}.hv-mis b,.hv-mis h4{font-size:14px}}
+@media (max-width:380px){.hv-evo .stg{flex:0 0 78px}}
+
 /* ---------- home: phone review (390x844 and 320x700) ---------- */
 .hv-next{position:relative;z-index:1;display:inline-block;max-width:100%;margin-top:6px;padding:3px 12px;border-radius:14px;background:rgba(255,210,60,.95);color:#4a3200;font-weight:900;font-size:12.5px;line-height:1.25;white-space:normal;text-shadow:none;border:2px solid #fff4c2}
 .hv-evo .stages{overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:4px}
@@ -886,7 +904,7 @@ function claimMis(id){
   if (!m || !d || m.claimed || m.got < d.need) return;
   m.claimed = true; giveCoins(d.coins);
   if (M.list.every(x => x.claimed) && !M.bonusGiven){ M.bonusGiven = true; giveGems(1); toast("All of today's missions done! +1 gem"); }
-  sfx.win(); save(); vMissions(); topbar();
+  sfx.win(); save(); if (TAB === "home") vHome(); else vMissions(); topbar();
 }
 const ACH = [
   {id:"first",  ic:"🎯", t:"First steps",   d:"Answer 1 question",             ok:() => (S.st.answered || 0) >= 1,   coins:5},
@@ -1039,11 +1057,42 @@ const ART_CHAL = '<svg class="art" viewBox="0 0 300 220" preserveAspectRatio="xM
   Array.from({length: 18}, (_, i) => '<path transform="translate(' + (14 + (i % 6) * 24) + ' ' + (16 + Math.floor(i / 6) * 26) + ') scale(.5)" d="M0-9l2.6 5.4 5.9.8-4.3 4.1 1 5.9L0 3.4l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z" fill="#fff"/>').join("") +
   '<g transform="translate(205 20) rotate(8)"><rect x="0" y="12" width="76" height="98" rx="8" fill="#e9eefb" stroke="#6b7fb0" stroke-width="3"/><rect x="22" y="2" width="32" height="18" rx="6" fill="#8aa0d4" stroke="#4a5c8c" stroke-width="2.5"/><path d="M12 38l7 7 12-14M12 62l7 7 12-14M12 86l7 7 12-14" stroke="#2bb34a" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 38h26M40 62h26M40 86h26" stroke="#9db0d6" stroke-width="4" stroke-linecap="round"/></g>' +
   '<g transform="translate(95 4)"><path d="M0 22l52-20 52 20-52 20z" fill="#14284b" stroke="#0a1633" stroke-width="2"/><path d="M22 34v16c0 8 60 8 60 0V34l-30 11z" fill="#1d3f8f" stroke="#0a1633" stroke-width="2"/><path d="M96 24v28" stroke="#ffd23c" stroke-width="3"/><circle cx="96" cy="55" r="5" fill="#ffd23c"/></g></svg>';
+
+/* ---------- home helpers: next-evolution goal and the daily mission card ---------- */
+function goalHtml(){
+  const si = stageIdx(); if (!S.onboarded) return "";
+  if (si >= 5) return '<div class="hv-goal">Libby is a Citizen! 🇺🇸</div>';
+  const c = doneLessons(), from = STAGE_LEVELS[si] || 0, to = STAGE_LEVELS[si + 1], pct = Math.max(4, Math.min(100, Math.round((c - from) / Math.max(1, to - from) * 100)));
+  return '<div class="hv-goal">' + esc(stageNeed(si + 1) || "Ready") + ' until ' + STAGE_DEF[si + 1][2] + '<i><em style="width:' + pct + '%"></em></i></div>';
+}
+function missionCard(){
+  const M = ensureMis(), all = M.list.every(m => m.claimed);
+  if (all) return '<h4>🎯 Today\'s missions</h4><b>All done for today! 🎉</b><div class="row1"><span>Come back tomorrow for new ones</span></div><button type="button" data-hg="missions">See missions</button>';
+  const rank = m => { const d = MIS_POOL.find(x => x.id === m.id); return m.claimed ? -1 : (m.got >= d.need ? 2 : m.got / d.need); };
+  const m = M.list.slice().sort((a, b) => rank(b) - rank(a))[0], d = MIS_POOL.find(x => x.id === m.id), ready = m.got >= d.need;
+  return '<h4>🎯 Today\'s mission</h4><b>' + esc(d.t) + '</b><div class="bar"><i style="width:' + Math.round(m.got / d.need * 100) + '%"></i></div><div class="row1"><span>' + m.got + ' / ' + d.need + '</span><span>+' + d.coins + ' coins</span></div>' +
+    (ready ? '<button class="claim" type="button" data-hg="mis-claim">Claim +' + d.coins + ' coins</button>' : '<button type="button" data-hg="mis-go">Continue</button>');
+}
+function missionGo(){
+  const M = ensureMis(), pend = M.list.filter(m => !m.claimed), m = pend.slice().sort((a, b) => b.got / MIS_POOL.find(x => x.id === b.id).need - a.got / MIS_POOL.find(x => x.id === a.id).need)[0]; if (!m) return go("missions");
+  const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length, nid = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
+  if (m.id === "simulado") return startTest("test");
+  if (m.id === "review") return missedIds().length ? startTest("review") : startChallenge();
+  if (m.id === "challenge") return showChallengeInfo();
+  if (nid >= 0) startLesson(nid); else startChallenge();
+}
 function nextLevelInfo(){
   const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length;
   const id = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
   if (id < 0) return "All " + LESSONS.length + " levels complete! 🎉";
   return "Next: Level " + (id + 1) + " of " + LESSONS.length + " · " + UNITS[LESSONS[id].unit].name;
+}
+function wireStrip(){
+  const st = document.querySelector(".hv-evo .stages"); if (!st) return;
+  const upd = () => { const max = st.scrollWidth - st.clientWidth; st.classList.toggle("fade-r", max > 4 && st.scrollLeft < max - 4); st.classList.toggle("fade-l", max > 4 && st.scrollLeft > 4); };
+  const cur = st.querySelector(".stg.cur");
+  if (cur && st.scrollWidth > st.clientWidth + 4) st.scrollLeft = Math.max(0, cur.offsetLeft - (st.clientWidth - cur.offsetWidth) / 2);
+  st.addEventListener("scroll", upd, {passive: true}); upd();
 }
 function vHome(){
   const si = stageIdx(), tm = totalMastered(), pct = Math.round(tm / 128 * 100);
@@ -1063,26 +1112,29 @@ function vHome(){
      '<div class="hv-ico">' + ib("ach", HI.trophy, "Achievements", achClaimable()) + ib("cards", HI.cards, "Cards") + ib("me", HI.stats, "My progress") + ib("me", HI.gear, "Settings") + '</div>' +
     '</div>' +
     '<div class="hv-body">' +
-     '<div class="hv-libby' + (S.own && S.own.halo ? ' halo' : '') + '"><div class="hv-fl">' + M() + '</div></div>' +
+     '<div class="hv-libby' + (S.own && S.own.halo ? ' halo' : '') + '"><div class="hv-fl">' + M() + '</div>' + goalHtml() + '</div>' +
      '<div class="hv-cards">' +
       '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p><span class="hv-next">' + esc(nextLevelInfo()) + '</span>' + play + '</div>' +
       '<div class="hv-card chal" role="button" tabindex="0" data-hg="test">' + ART_CHAL + '<h3><small>Citizenship</small>Challenge</h3><p>Practice for the U.S. citizenship interview.</p>' + play + '</div>' +
      '</div>' +
      '<div class="hv-evo"><span class="hv-rib">Your Eagle Evolution</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
-     '<div class="hv-skills"><h4>' + HI.starc + 'New Skills</h4><div class="hv-sk">' +
-       sk("bonus", HI.bolt, bonusOn() ? "Bonus ON" : "XP Bonus") + sk("voice", HI.mic, "Voice Practice") + sk("challenge", HI.target, "Weak Spots Challenge") + sk("soon:Beat the Clock", HI.clock, "Beat the Clock", 1) + sk("soon:Special Animations", HI.wings, "Special Animations", 1) +
+     '<div class="hv-mis">' + missionCard() + '</div>' + '<div class="hv-skills"><h4>' + HI.starc + 'New Skills</h4><div class="hv-sk">' +
+       sk("bonus", HI.bolt, bonusOn() ? "Bonus ON" : "XP Bonus") + sk("voice", HI.mic, "Voice Practice") + sk("challenge", HI.target, "Weak Spots Challenge") +
      '</div></div>' +
     '</div>' +
     '<nav class="hv-bar" aria-label="Menu">' +
      bar("learn", HI.map, "Levels") + bar("missions", HI.mission, "Missions", 0, misClaimable()) + bar("ach", HI.medal, "Awards", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("shop", HI.chest, "Rewards") + bar("test", HI.guide, "Test Guide") +
     '</nav>' +
    '</section>';
+  wireStrip();
 }
 $("view").addEventListener("click", e => {
   const b = e.target.closest("[data-hg]"); if (!b) return;
   const g = b.dataset.hg; sfx.tap();
   if (g.startsWith("soon:")) toast(g.slice(5) + ": coming soon!");
   else if (g === "voice") startTest("test");
+  else if (g === "mis-go") missionGo();
+  else if (g === "mis-claim"){ const M = ensureMis(), r = M.list.filter(m => !m.claimed && m.got >= MIS_POOL.find(x => x.id === m.id).need)[0]; if (r) claimMis(r.id); }
   else if (g === "learn"){ window._scrolled = 0; go("learn"); }
   else if (g === "bonus") showBonus();
   else if (g === "challenge") showChallengeInfo();
@@ -1673,6 +1725,7 @@ function renderResult(first){
     title = "Almost there!"; mdl = "sad";
     sub = "You need at least 70% right on the first try to unlock the next level. You got " + R.lessonFc + " of " + R.lessonN + " (" + R.lessonPct + "%). Review the answers below and try again.";
   }
+  else if (R.kind === "review"){ title = R.wrong === 0 ? "Mistakes fixed!" : "Review complete!"; sub = R.wrong === 0 ? "You got every one right this time." : "Keep at it: the ones you missed will come back in your next Weak Spots Challenge."; }
   else if (R.kind === "challenge"){ title = R.won ? "Challenge won!" : "So close!"; mdl = R.won ? "happy" : "sad"; sub = "You got " + R.correct + " of " + R.total + " right on the trickiest options." + (R.coinsWon ? " +" + R.coinsWon + " coins." : "") + (R.won ? "" : " Win with 8 of 10."); }
   else { title = R.wrong === 0 ? "Perfect lesson!" : "Lesson complete!"; sub = R.wrong === 0 ? "No mistakes. Bonus XP earned." : "You finished it. Mistakes become strengths."; }
   const acc = asked ? Math.round(R.correct / asked * 100) : 0;
@@ -1685,10 +1738,11 @@ function renderResult(first){
   }
   $("res").innerHTML = '<div class="big bob" id="resM">' + M() + '</div><h1>' + title + '</h1><p class="sub">' + sub + '</p>' + (stageIdx() > R.stage0 ? '<div class="evolve">Libby grew up! She is now a ' + STAGE_DEF[stageIdx()][1] + '.</div>' : '') +
    '<div class="tiles"><div class="tile g"><b>+' + R.xp + '</b><span>XP</span></div><div class="tile b"><b>' + R.correct + "/" + asked + '</b><span>Correct</span></div><div class="tile r"><b>' + acc + '%</b><span>Accuracy</span></div></div>' + review +
-   '<div class="spacer"></div><div style="width:100%;display:grid;gap:10px"><button class="btn" id="resOk" type="button">Continue</button>' + (test ? '<button class="btn ghost" id="resAgain" type="button">Try another simulado</button>' : R.kind === "challenge" ? '<button class="btn ghost" id="resAgain" type="button">Play another Weak Spots Challenge</button>' : "") + (R.kind === "lesson" && R.lessonPass === false ? '<button class="btn gline" id="resRetry" type="button">Try this level again</button>' : "") + '</div>';
+   '<div class="spacer"></div><div style="width:100%;display:grid;gap:10px">' + (R.kind === "challenge" && missed.length ? '<button class="btn" id="resReview" type="button">Review your mistakes (' + missed.length + ')</button>' : "") + '<button class="btn' + (R.kind === "challenge" && missed.length ? " ghost" : "") + '" id="resOk" type="button">Continue</button>' + (test ? '<button class="btn ghost" id="resAgain" type="button">Try another simulado</button>' : R.kind === "challenge" ? '<button class="btn ghost" id="resAgain" type="button">Play another Weak Spots Challenge</button>' : "") + (R.kind === "lesson" && R.lessonPass === false ? '<button class="btn gline" id="resRetry" type="button">Try this level again</button>' : "") + '</div>';
   mood($("resM"), mdl);
   if (first){ if (R.kind === "challenge" ? R.won : ((!test && R.lessonPass !== false) || (test && R.passed))){ sfx.win(); confetti(); } else sfx.bad(); }
   $("resOk").onclick = () => { $("res").hidden = true; R = null; go(TAB); };
+  const rv = $("resReview"); if (rv) rv.onclick = () => { const deck = missed.slice(); $("res").hidden = true; begin({kind:"review", label:"Review your mistakes", deck, need:0}); };
   const rt = $("resRetry"); if (rt) rt.onclick = () => { const id = R.id; $("res").hidden = true; startLesson(id); };
   const ag = $("resAgain"); if (ag) ag.onclick = () => { if (R.kind === "challenge"){ $("res").hidden = true; startChallenge(); return; } const lab = R.label; $("res").hidden = true; startTest(lab.startsWith("65") ? "senior" : "test"); };
   $("res").querySelectorAll("[data-ov]").forEach(b => b.onclick = () => {
