@@ -275,6 +275,12 @@ footer.fine a{color:inherit}
 .stg.past .sc{border-color:var(--gold)}
 .stg.cur{color:var(--gold-d)}
 .stg.cur .sc{border-color:var(--gold);background:#fff4d6;box-shadow:0 0 0 4px rgba(230,169,43,.25)}
+.hint50{margin-top:6px;border:2px dashed var(--gold-d);background:var(--card);color:var(--gold-d);border-radius:14px;padding:9px 14px;font-weight:900;cursor:pointer}
+.hint50[disabled]{opacity:.6;cursor:default}
+.opt.gone{opacity:.28;text-decoration:line-through}
+.fx-have{display:inline-block;margin-left:6px;background:var(--soft);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:900;color:var(--ink)}
+.hv-libby.halo .hv-fl{filter:drop-shadow(0 0 14px #ffd23c) drop-shadow(0 0 38px rgba(255,210,60,.75))}
+
 /* ---------- coins, missions, achievements, XP bonus ---------- */
 .fx-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
 .fx-head h2{margin:0;font-size:24px;font-weight:900;flex:1}
@@ -667,7 +673,7 @@ const IC = {
 
 /* ---------- state ---------- */
 let KEY = "libbycivics.v2";
-const freshState = () => ({style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], mock:{}, mockXp:false, onboarded:false, hatched:false, coinsEarned:0, coinsSpent:0, gemsEarned:0, gemsSpent:0, bonusUntil:0, mis:null, ach:{}, st:{answered:0, correct:0, perfect:0}});
+const freshState = () => ({style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], mock:{}, mockXp:false, onboarded:false, hatched:false, coinsEarned:0, coinsSpent:0, gemsEarned:0, gemsSpent:0, bonusUntil:0, mis:null, ach:{}, st:{answered:0, correct:0, perfect:0}, shieldBought:0, shieldUsed:0, hintsBought:0, hintsUsed:0, own:{}});
 let S = freshState();
 try { const x = JSON.parse(localStorage.getItem(KEY)||"null"); if (x && x.q) S = Object.assign(S, x); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} if (typeof cloudPush === "function") cloudPush(); }
@@ -675,9 +681,15 @@ const dayStr = d => d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0
 function touchStreak(){
   const now = new Date(), t = dayStr(now); if (S.last === t) return;
   const y = new Date(now); y.setDate(y.getDate()-1);
-  S.days = S.last === dayStr(y) ? S.days + 1 : 1; S.last = t;
+  const y2 = new Date(now); y2.setDate(y2.getDate()-2);
+  if (S.last === dayStr(y)) S.days = S.days + 1;
+  else if (S.last === dayStr(y2) && S.days > 0 && shieldLeft() > 0){ S.shieldUsed = (S.shieldUsed || 0) + 1; S.days = S.days + 1; setTimeout(() => toast("Streak Shield used! Your streak keeps going."), 800); }
+  else S.days = 1;
+  S.last = t;
 }
-function liveStreak(){ if (!S.last) return 0; const now = new Date(), y = new Date(now); y.setDate(y.getDate()-1); return (S.last === dayStr(now) || S.last === dayStr(y)) ? S.days : 0; }
+const shieldLeft = () => Math.max(0, (S.shieldBought || 0) - (S.shieldUsed || 0));
+const hintsLeft = () => Math.max(0, (S.hintsBought || 0) - (S.hintsUsed || 0));
+function liveStreak(){ if (!S.last) return 0; const now = new Date(), y = new Date(now); y.setDate(y.getDate()-1); const y2 = new Date(now); y2.setDate(y2.getDate()-2); return (S.last === dayStr(now) || S.last === dayStr(y) || (S.last === dayStr(y2) && shieldLeft() > 0)) ? S.days : 0; }
 const doneLessons = () => Object.keys(S.done || {}).filter(k => S.done[k]).length;
 const level = () => doneLessons() + 1;   /* same number as the nodes on the path: finished levels + 1 */
 
@@ -782,7 +794,7 @@ function nav(){
 }
 function go(t){ TAB = t; document.body.classList.toggle("onhome", t === "home"); nav(); render(); window.scrollTo(0,0); }
 $("navBtns").addEventListener("click", e => { const b = e.target.closest("button"); if (b){ sfx.tap(); go(b.dataset.tab); } });
-function render(){ topbar(); document.body.classList.toggle("onhome", TAB === "home"); ({home:vHome,missions:vMissions,ach:vAch,learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); checkEvolve(); }
+function render(){ topbar(); document.body.classList.toggle("onhome", TAB === "home"); ({home:vHome,missions:vMissions,ach:vAch,shop:vShop,learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); checkEvolve(); }
 
 const lessonOpen = L => !!S.unlockAll || L.id === 0 || !!S.done[LESSONS[L.id - 1].id] || mastered(LESSONS[L.id - 1]) >= LESSONS[L.id - 1].qs.length;
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="currentColor"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
@@ -791,7 +803,8 @@ const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10"
 function ensureEco(){
   if (!S.st) S.st = {answered:0, correct:0, perfect:0};
   if (!S.ach) S.ach = {};
-  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil"].forEach(k => { if (typeof S[k] !== "number") S[k] = 0; });
+  if (!S.own) S.own = {};
+  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil", "shieldBought", "shieldUsed", "hintsBought", "hintsUsed"].forEach(k => { if (typeof S[k] !== "number") S[k] = 0; });
 }
 const coins = () => { ensureEco(); return Math.max(0, S.coinsEarned - S.coinsSpent); };
 const gems = () => { ensureEco(); return Math.max(0, S.gemsEarned - S.gemsSpent); };
@@ -800,12 +813,12 @@ const giveGems = n => { ensureEco(); S.gemsEarned += n; };
 const bonusOn = () => (S.bonusUntil || 0) > Date.now();
 const BONUS_COST = 30, BONUS_MIN = 15;
 const MIS_POOL = [
-  {id:"answer",   t:"Responda 10 perguntas",       need:10, coins:10, ev:"answer"},
-  {id:"correct",  t:"Acerte 8 perguntas",          need:8,  coins:15, ev:"correct"},
-  {id:"lesson",   t:"Passe de um nível",           need:1,  coins:20, ev:"lesson"},
-  {id:"streak",   t:"Acerte 5 seguidas",           need:5,  coins:15, ev:"streak", max:true},
-  {id:"simulado", t:"Termine um teste de prática", need:1,  coins:20, ev:"simulado"},
-  {id:"review",   t:"Revise seus erros",           need:1,  coins:15, ev:"review"}
+  {id:"answer",   t:"Answer 10 questions",       need:10, coins:10, ev:"answer"},
+  {id:"correct",  t:"Get 8 answers right",          need:8,  coins:15, ev:"correct"},
+  {id:"lesson",   t:"Pass a level",           need:1,  coins:20, ev:"lesson"},
+  {id:"streak",   t:"Get 5 in a row",           need:5,  coins:15, ev:"streak", max:true},
+  {id:"simulado", t:"Finish a practice test", need:1,  coins:20, ev:"simulado"},
+  {id:"review",   t:"Review your mistakes",           need:1,  coins:15, ev:"review"}
 ];
 function ensureMis(){
   ensureEco(); const today = dayStr(new Date());
@@ -829,27 +842,27 @@ function claimMis(id){
   const M = ensureMis(), m = M.list.find(x => x.id === id), d = MIS_POOL.find(x => x.id === id);
   if (!m || !d || m.claimed || m.got < d.need) return;
   m.claimed = true; giveCoins(d.coins);
-  if (M.list.every(x => x.claimed) && !M.bonusGiven){ M.bonusGiven = true; giveGems(1); toast("Todas as missões de hoje! +1 gema"); }
+  if (M.list.every(x => x.claimed) && !M.bonusGiven){ M.bonusGiven = true; giveGems(1); toast("All of today's missions done! +1 gem"); }
   sfx.win(); save(); vMissions(); topbar();
 }
 const ACH = [
-  {id:"first",  ic:"🎯", t:"Primeiros passos",   d:"Responda 1 pergunta",             ok:() => (S.st.answered || 0) >= 1,   coins:5},
-  {id:"ans100", ic:"💬", t:"Boa de papo",        d:"Responda 100 perguntas",          ok:() => (S.st.answered || 0) >= 100, coins:30},
-  {id:"m10",    ic:"📘", t:"Aquecendo",          d:"Domine 10 perguntas",             ok:() => totalMastered() >= 10,       coins:10},
-  {id:"m50",    ic:"📗", t:"Metade do caminho",  d:"Domine 50 perguntas",             ok:() => totalMastered() >= 50,       coins:30, gems:1},
-  {id:"m100",   ic:"📙", t:"Quase lá",           d:"Domine 100 perguntas",            ok:() => totalMastered() >= 100,      coins:60, gems:2},
-  {id:"m128",   ic:"🏅", t:"Mestre do teste",    d:"Domine as 128 perguntas",         ok:() => totalMastered() >= 128,      coins:150, gems:5},
-  {id:"l1",     ic:"🚩", t:"Primeiro nível",     d:"Passe de 1 nível",                ok:() => doneLessons() >= 1,          coins:10},
-  {id:"l10",    ic:"🗺️", t:"Explorador",         d:"Passe de 10 níveis",              ok:() => doneLessons() >= 10,         coins:50, gems:1},
-  {id:"l20",    ic:"🏆", t:"Trilha completa",    d:"Passe dos 20 níveis",             ok:() => doneLessons() >= 20,         coins:120, gems:3},
-  {id:"perf",   ic:"✨", t:"Sem errar",          d:"Termine um nível sem erros",      ok:() => (S.st.perfect || 0) >= 1,    coins:20},
-  {id:"s3",     ic:"🔥", t:"Pegando o ritmo",    d:"3 dias seguidos estudando",       ok:() => (S.days || 0) >= 3,          coins:15},
-  {id:"s7",     ic:"🔥", t:"Semana de fogo",     d:"7 dias seguidos estudando",       ok:() => (S.days || 0) >= 7,          coins:50, gems:1},
-  {id:"sim",    ic:"🎓", t:"Aprovado no teste",  d:"Passe em um teste de prática",    ok:() => (S.passed || 0) >= 1,        coins:40, gems:1},
-  {id:"kid",    ic:"🐥", t:"Libby cresceu",      d:"Libby chega a Kid",               ok:() => stageIdx() >= 2,             coins:20},
-  {id:"teen",   ic:"🦅", t:"Adolescente",        d:"Libby chega a Teen",              ok:() => stageIdx() >= 3,             coins:30},
-  {id:"adult",  ic:"🦅", t:"Adulta",             d:"Libby chega a Adult",             ok:() => stageIdx() >= 4,             coins:40},
-  {id:"cit",    ic:"🇺🇸", t:"Cidadã",             d:"Libby vira Citizen",              ok:() => stageIdx() >= 5,             coins:80, gems:2}
+  {id:"first",  ic:"🎯", t:"First steps",   d:"Answer 1 question",             ok:() => (S.st.answered || 0) >= 1,   coins:5},
+  {id:"ans100", ic:"💬", t:"Chatterbox",        d:"Answer 100 questions",          ok:() => (S.st.answered || 0) >= 100, coins:30},
+  {id:"m10",    ic:"📘", t:"Warming up",          d:"Master 10 questions",             ok:() => totalMastered() >= 10,       coins:10},
+  {id:"m50",    ic:"📗", t:"Halfway there",  d:"Master 50 questions",             ok:() => totalMastered() >= 50,       coins:30, gems:1},
+  {id:"m100",   ic:"📙", t:"Almost there",           d:"Master 100 questions",            ok:() => totalMastered() >= 100,      coins:60, gems:2},
+  {id:"m128",   ic:"🏅", t:"Test master",    d:"Master all 128 questions",         ok:() => totalMastered() >= 128,      coins:150, gems:5},
+  {id:"l1",     ic:"🚩", t:"First level",     d:"Pass 1 level",                ok:() => doneLessons() >= 1,          coins:10},
+  {id:"l10",    ic:"🗺️", t:"Explorer",         d:"Pass 10 levels",              ok:() => doneLessons() >= 10,         coins:50, gems:1},
+  {id:"l20",    ic:"🏆", t:"Full trail",    d:"Pass all 20 levels",             ok:() => doneLessons() >= 20,         coins:120, gems:3},
+  {id:"perf",   ic:"✨", t:"Flawless",          d:"Finish a level with no mistakes",      ok:() => (S.st.perfect || 0) >= 1,    coins:20},
+  {id:"s3",     ic:"🔥", t:"Getting in rhythm",    d:"Study 3 days in a row",       ok:() => (S.days || 0) >= 3,          coins:15},
+  {id:"s7",     ic:"🔥", t:"Week on fire",     d:"Study 7 days in a row",       ok:() => (S.days || 0) >= 7,          coins:50, gems:1},
+  {id:"sim",    ic:"🎓", t:"Test passed",  d:"Pass a practice test",    ok:() => (S.passed || 0) >= 1,        coins:40, gems:1},
+  {id:"kid",    ic:"🐥", t:"Libby grew up",      d:"Libby reaches Kid",               ok:() => stageIdx() >= 2,             coins:20},
+  {id:"teen",   ic:"🦅", t:"Teenager",        d:"Libby reaches Teen",              ok:() => stageIdx() >= 3,             coins:30},
+  {id:"adult",  ic:"🦅", t:"Grown-up",             d:"Libby reaches Adult",             ok:() => stageIdx() >= 4,             coins:40},
+  {id:"cit",    ic:"🇺🇸", t:"Citizen",             d:"Libby becomes a Citizen",              ok:() => stageIdx() >= 5,             coins:80, gems:2}
 ];
 const achClaimable = () => { ensureEco(); return ACH.filter(a => !S.ach[a.id] && a.ok()).length; };
 function claimAch(id){
@@ -871,28 +884,28 @@ function onFinish(){
   }
   if (R.kind === "test"){ misEvent("simulado", 1); if (R.passed) c += 25; }
   if (R.kind === "review") misEvent("review", 1);
-  if (c){ giveCoins(c); R.coinsWon = c; setTimeout(() => toast("+" + c + " moedas"), 600); }
+  if (c){ giveCoins(c); R.coinsWon = c; setTimeout(() => toast("+" + c + " coins"), 600); }
 }
 function showBonus(){
   ensureEco(); const old = $("fxm"); if (old) old.remove();
   const el = document.createElement("div"); el.id = "fxm"; el.setAttribute("role", "dialog");
   const left = Math.max(0, Math.ceil(((S.bonusUntil || 0) - Date.now()) / 60000));
-  el.innerHTML = '<div class="box"><h3>⚡ Bônus de XP</h3>' + (bonusOn() ? '<p>Ativo! Você ganha o <b>dobro de XP</b> nas perguntas por mais <b>' + left + ' min</b>.</p><button class="btn" id="fxClose" type="button">Continuar estudando</button>' :
-    '<p>Ganhe o <b>dobro de XP</b> em cada pergunta por ' + BONUS_MIN + ' minutos.</p><p>Custa <b>' + BONUS_COST + ' moedas</b>. Você tem <b>' + coins() + '</b>.</p><div class="row"><button class="btn ghost" id="fxClose" type="button">Agora não</button><button class="btn" id="fxGo" type="button"' + (coins() < BONUS_COST ? " disabled" : "") + '>Ativar</button></div>' + (coins() < BONUS_COST ? '<p style="font-size:13px">Ganhe moedas acertando perguntas, passando de nível e cumprindo missões.</p>' : "")) + '</div>';
+  el.innerHTML = '<div class="box"><h3>⚡ XP Bonus</h3>' + (bonusOn() ? '<p>Active! You earn <b>double XP</b> on questions for <b>' + left + ' more min</b>.</p><button class="btn" id="fxClose" type="button">Keep studying</button>' :
+    '<p>Earn <b>double XP</b> on every question for ' + BONUS_MIN + ' minutes.</p><p>It costs <b>' + BONUS_COST + ' coins</b>. You have <b>' + coins() + '</b>.</p><div class="row"><button class="btn ghost" id="fxClose" type="button">Not now</button><button class="btn" id="fxGo" type="button"' + (coins() < BONUS_COST ? " disabled" : "") + '>Activate</button></div>' + (coins() < BONUS_COST ? '<p style="font-size:13px">Earn coins by answering questions, passing levels and finishing missions.</p>' : "")) + '</div>';
   document.body.appendChild(el);
   $("fxClose").onclick = () => el.remove();
   el.onclick = e => { if (e.target === el) el.remove(); };
-  const go_ = $("fxGo"); if (go_) go_.onclick = () => { if (coins() < BONUS_COST) return; S.coinsSpent += BONUS_COST; S.bonusUntil = Date.now() + BONUS_MIN * 60000; save(); sfx.win(); el.remove(); toast("Bônus de XP ativado por " + BONUS_MIN + " min!"); if (TAB === "home") vHome(); };
+  const go_ = $("fxGo"); if (go_) go_.onclick = () => { if (coins() < BONUS_COST) return; S.coinsSpent += BONUS_COST; S.bonusUntil = Date.now() + BONUS_MIN * 60000; save(); sfx.win(); el.remove(); toast("XP Bonus on for " + BONUS_MIN + " min!"); if (TAB === "home") vHome(); };
 }
-function fxHead(title){ return '<div class="fx-head"><button class="fx-back" type="button" data-hg="home">← Home</button><h2>' + title + '</h2></div><div class="fx-wallet"><span>' + HI.coin + coins() + ' moedas</span><span>' + HI.gem + gems() + ' gemas</span><span>' + HI.starc + S.xp + ' XP</span></div>'; }
+function fxHead(title){ return '<div class="fx-head"><button class="fx-back" type="button" data-hg="home">← Home</button><h2>' + title + '</h2></div><div class="fx-wallet"><span>' + HI.coin + coins() + ' coins</span><span>' + HI.gem + gems() + (gems() === 1 ? ' gem' : ' gems') + '</span><span>' + HI.starc + S.xp + ' XP</span></div>'; }
 function vMissions(){
   const M = ensureMis(), left = M.list.filter(m => !m.claimed).length;
   const rows = M.list.map(m => {
     const d = MIS_POOL.find(x => x.id === m.id), ok = m.got >= d.need, pct = Math.round(m.got / d.need * 100);
     return '<div class="fx-it' + (m.claimed ? " done" : "") + '"><span class="fx-ic">' + (m.claimed ? "✅" : "🎯") + '</span><div><b>' + d.t + '</b><small>' + m.got + ' / ' + d.need + '</small><div class="fx-bar"><i style="width:' + pct + '%"></i></div><span class="fx-rw">' + HI.coin + '+' + d.coins + '</span></div>' +
-      (m.claimed ? '<button class="fx-btn claimed" type="button" disabled>Resgatado</button>' : '<button class="fx-btn" type="button" data-claim="' + m.id + '"' + (ok ? "" : " disabled") + '>Resgatar</button>') + '</div>';
+      (m.claimed ? '<button class="fx-btn claimed" type="button" disabled>Claimed</button>' : '<button class="fx-btn" type="button" data-claim="' + m.id + '"' + (ok ? "" : " disabled") + '>Claim</button>') + '</div>';
   }).join("");
-  $("view").innerHTML = fxHead("Missões") + '<p class="fx-sum">Novas missões todo dia. ' + (left ? "Faltam " + left + " hoje." : "Você cumpriu todas hoje! 🎉") + ' Cumpra as 3 e ganhe +1 gema.</p><div class="fx-list">' + rows + '</div>';
+  $("view").innerHTML = fxHead("Missions") + '<p class="fx-sum">New missions every day. ' + (left ? left + " left today." : "You finished them all today! 🎉") + ' Finish all 3 to earn +1 gem.</p><div class="fx-list">' + rows + '</div>';
 }
 function vAch(){
   ensureEco(); const got = ACH.filter(a => S.ach[a.id]).length;
@@ -900,14 +913,46 @@ function vAch(){
     const claimed = !!S.ach[a.id], ok = a.ok();
     const rw = '<span class="fx-rw">' + HI.coin + '+' + (a.coins || 0) + '</span>' + (a.gems ? '<span class="fx-rw">' + HI.gem + '+' + a.gems + '</span>' : "");
     return '<div class="fx-it' + (claimed ? " done" : ok ? "" : " locked") + '"><span class="fx-ic">' + (ok || claimed ? a.ic : "🔒") + '</span><div><b>' + a.t + '</b><small>' + a.d + '</small>' + rw + '</div>' +
-      (claimed ? '<button class="fx-btn claimed" type="button" disabled>Resgatado</button>' : '<button class="fx-btn" type="button" data-claimA="' + a.id + '"' + (ok ? "" : " disabled") + '>' + (ok ? "Resgatar" : "Bloqueada") + '</button>') + '</div>';
+      (claimed ? '<button class="fx-btn claimed" type="button" disabled>Claimed</button>' : '<button class="fx-btn" type="button" data-claimA="' + a.id + '"' + (ok ? "" : " disabled") + '>' + (ok ? "Claim" : "Locked") + '</button>') + '</div>';
   }).join("");
-  $("view").innerHTML = fxHead("Conquistas") + '<p class="fx-sum">' + got + ' de ' + ACH.length + ' conquistas resgatadas.</p><div class="fx-list">' + rows + '</div>';
+  $("view").innerHTML = fxHead("Achievements") + '<p class="fx-sum">' + got + ' of ' + ACH.length + ' achievements claimed.</p><div class="fx-list">' + rows + '</div>';
 }
 $("view").addEventListener("click", e => {
   const c = e.target.closest("[data-claim]"); if (c && !c.disabled){ sfx.tap(); claimMis(c.dataset.claim); return; }
   const a = e.target.closest("[data-claimA]"); if (a && !a.disabled){ sfx.tap(); claimAch(a.dataset.claima || a.getAttribute("data-claimA")); }
 });
+
+/* ---------- shop: spend coins and gems ---------- */
+const spendCoins = n => { if (coins() < n) return false; S.coinsSpent += n; return true; };
+const spendGems = n => { if (gems() < n) return false; S.gemsSpent += n; return true; };
+const SHOP = [
+  {id:"hint",   ic:"✂️", t:"50/50 hint",             d:"Removes 2 wrong options from a multiple-choice question. Shows up as a button during a level.", coins:15,
+   have:() => hintsLeft(), buy:() => { S.hintsBought = (S.hintsBought || 0) + 1; }},
+  {id:"shield", ic:"🛡️", t:"Streak Shield",  d:"If you miss 1 day, your day streak does not reset. Uses 1 shield per missed day.", coins:40,
+   have:() => shieldLeft(), buy:() => { S.shieldBought = (S.shieldBought || 0) + 1; }},
+  {id:"xp30",   ic:"⚡", t:"Double XP for 30 min", d:"Double XP on every question. Adds to the XP Bonus if it is already on.", gems:5,
+   have:() => bonusOn() ? Math.max(1, Math.ceil((S.bonusUntil - Date.now()) / 60000)) + " min" : 0, buy:() => { S.bonusUntil = Math.max(Date.now(), S.bonusUntil || 0) + 30 * 60000; }},
+  {id:"halo",   ic:"🌟", t:"Golden glow for Libby", d:"A golden glow around Libby on the home screen. Yours forever.", coins:80, once:true,
+   have:() => S.own.halo ? "owned" : 0, buy:() => { S.own.halo = Date.now(); }}
+];
+function buyItem(id){
+  ensureEco(); const it = SHOP.find(x => x.id === id); if (!it) return;
+  if (it.once && S.own[it.id]) return toast("You already own this.");
+  const ok = it.gems ? spendGems(it.gems) : spendCoins(it.coins);
+  if (!ok) return toast(it.gems ? "Not enough gems." : "Not enough coins. Answer questions and finish missions!");
+  it.buy(); sfx.win(); save(); toast(it.t + " purchased!"); vShop(); topbar();
+}
+function vShop(){
+  ensureEco();
+  const rows = SHOP.map(it => {
+    const own = it.once && S.own[it.id], afford = it.gems ? gems() >= it.gems : coins() >= it.coins, h = it.have();
+    const price = it.gems ? '<span class="fx-rw">' + HI.gem + it.gems + ' gems</span>' : '<span class="fx-rw">' + HI.coin + it.coins + ' coins</span>';
+    return '<div class="fx-it' + (own ? " done" : "") + '"><span class="fx-ic">' + it.ic + '</span><div><b>' + it.t + (h ? '<span class="fx-have">' + (h === "owned" ? "owned ✓" : (typeof h === "number" ? "you have " + h : "active: " + h)) + '</span>' : "") + '</b><small>' + it.d + '</small>' + price + '</div>' +
+      (own ? '<button class="fx-btn claimed" type="button" disabled>Owned</button>' : '<button class="fx-btn" type="button" data-buy="' + it.id + '"' + (afford ? "" : " disabled") + '>Buy</button>') + '</div>';
+  }).join("");
+  $("view").innerHTML = fxHead("Rewards") + '<p class="fx-sum">Spend your coins and gems. Earn more by answering questions, passing levels and finishing missions and achievements.</p><div class="fx-list">' + rows + '</div>';
+}
+$("view").addEventListener("click", e => { const b = e.target.closest("[data-buy]"); if (b && !b.disabled){ sfx.tap(); buyItem(b.dataset.buy); } });
 
 /* ---------- home view (game-style) ---------- */
 const STAGE_LEVELS = [0, 0, 4, 9, 14, 19];   /* finished levels needed for each stage index (same numbers as stageIdx) */
@@ -951,37 +996,37 @@ function vHome(){
   const nxt = si < 5 ? STAGE_DEF[si + 1][1] + ": " + (stageNeed(si + 1) || "ready") : "Libby is a Citizen!";
   const bdg = n => n > 0 ? '<span class="hv-badge">' + n + '</span>' : "";
   const ib = (go, ic, lab, n) => '<button class="hv-ib" type="button" data-hg="' + go + '" aria-label="' + lab + '">' + ic + bdg(n) + '</button>';
-  const sk = (go, ic, lab, soon) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Em breve</span>' : "") + ic + '<span>' + lab + '</span></button>';
-  const bar = (go, ic, lab, soon, n) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Em breve</span>' : "") + bdg(n) + ic + '<span>' + lab + '</span></button>';
+  const sk = (go, ic, lab, soon) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Soon</span>' : "") + ic + '<span>' + lab + '</span></button>';
+  const bar = (go, ic, lab, soon, n) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Soon</span>' : "") + bdg(n) + ic + '<span>' + lab + '</span></button>';
   const play = '<span class="hv-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
   $("view").innerHTML =
    '<section class="hv" aria-label="Home">' +
     '<div class="hv-top">' +
      '<div class="hv-logo"><img src="' + IMG.logo + '" alt=""><div>Liberty<b>Quiz</b></div></div>' +
      '<div class="hv-lvl"><img src="' + IMG.logo + '" alt=""><div class="t">Level ' + level() + '<i><em style="width:' + Math.max(4, pct) + '%"></em></i><span style="font-size:11px;font-weight:800">' + tm + ' / 128</span></div></div>' +
-     '<div class="hv-chips"><span class="hv-chip" title="XP">' + HI.starc + S.xp + '</span><span class="hv-chip" title="Moedas">' + HI.coin + coins() + '</span><span class="hv-chip" title="Gemas">' + HI.gem + gems() + '</span></div>' +
-     '<div class="hv-ico">' + ib("ach", HI.trophy, "Conquistas", achClaimable()) + ib("cards", HI.cards, "Cards") + ib("me", HI.stats, "Meu progresso") + ib("me", HI.gear, "Configuracoes") + '</div>' +
+     '<div class="hv-chips"><span class="hv-chip" title="XP">' + HI.starc + S.xp + '</span><span class="hv-chip" title="Coins">' + HI.coin + coins() + '</span><span class="hv-chip" title="Gems">' + HI.gem + gems() + '</span></div>' +
+     '<div class="hv-ico">' + ib("ach", HI.trophy, "Achievements", achClaimable()) + ib("cards", HI.cards, "Cards") + ib("me", HI.stats, "My progress") + ib("me", HI.gear, "Settings") + '</div>' +
     '</div>' +
     '<div class="hv-body">' +
-     '<div class="hv-libby"><div class="hv-fl">' + M() + '</div></div>' +
+     '<div class="hv-libby' + (S.own && S.own.halo ? ' halo' : '') + '"><div class="hv-fl">' + M() + '</div></div>' +
      '<div class="hv-cards">' +
-      '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Aprenda pelas fases e acompanhe o crescimento da Libby.</p>' + play + '</div>' +
-      '<div class="hv-card chal" role="button" tabindex="0" data-hg="test">' + ART_CHAL + '<h3><small>Citizenship</small>Challenge</h3><p>Pratique para a entrevista de cidadania dos EUA.</p>' + play + '</div>' +
+      '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p>' + play + '</div>' +
+      '<div class="hv-card chal" role="button" tabindex="0" data-hg="test">' + ART_CHAL + '<h3><small>Citizenship</small>Challenge</h3><p>Practice for the U.S. citizenship interview.</p>' + play + '</div>' +
      '</div>' +
-     '<div class="hv-evo"><span class="hv-rib">Evolução da sua Águia</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
-     '<div class="hv-skills"><h4>' + HI.starc + 'Novas Habilidades</h4><div class="hv-sk">' +
-       sk("bonus", HI.bolt, bonusOn() ? "Bônus ATIVO" : "Bônus de XP") + sk("voice", HI.mic, "Treino de Voz") + sk("soon:Modo Desafio", HI.target, "Modo Desafio", 1) + sk("soon:Contra o Relógio", HI.clock, "Contra o Relógio", 1) + sk("soon:Animações Especiais", HI.wings, "Animações Especiais", 1) +
+     '<div class="hv-evo"><span class="hv-rib">Your Eagle Evolution</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
+     '<div class="hv-skills"><h4>' + HI.starc + 'New Skills</h4><div class="hv-sk">' +
+       sk("bonus", HI.bolt, bonusOn() ? "Bonus ON" : "XP Bonus") + sk("voice", HI.mic, "Voice Practice") + sk("soon:Challenge Mode", HI.target, "Challenge Mode", 1) + sk("soon:Beat the Clock", HI.clock, "Beat the Clock", 1) + sk("soon:Special Animations", HI.wings, "Special Animations", 1) +
      '</div></div>' +
     '</div>' +
     '<nav class="hv-bar" aria-label="Menu">' +
-     bar("learn", HI.map, "Fases") + bar("missions", HI.mission, "Missões", 0, misClaimable()) + bar("ach", HI.medal, "Conquistas", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("soon:Recompensas", HI.chest, "Recompensas", 1) + bar("test", HI.guide, "Guia do Teste") +
+     bar("learn", HI.map, "Levels") + bar("missions", HI.mission, "Missions", 0, misClaimable()) + bar("ach", HI.medal, "Achievements", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("shop", HI.chest, "Rewards") + bar("test", HI.guide, "Test Guide") +
     '</nav>' +
    '</section>';
 }
 $("view").addEventListener("click", e => {
   const b = e.target.closest("[data-hg]"); if (!b) return;
   const g = b.dataset.hg; sfx.tap();
-  if (g.startsWith("soon:")) toast(g.slice(5) + ": em breve!");
+  if (g.startsWith("soon:")) toast(g.slice(5) + ": coming soon!");
   else if (g === "voice") startTest("test");
   else if (g === "bonus") showBonus();
   else go(g);
@@ -1306,9 +1351,18 @@ function ask(){
   if (R.mock === "reading" || R.mock === "writing"){} else if (R.style === "voice" ? S.readTest !== false : S.autoRead) setTimeout(() => R && R.cur === q && speak(q.q), 250);
 }
 function renderChoices(){
-  $("choices").innerHTML = R.mc.opts.map((o, i) => '<div class="optrow"><button class="opt" data-i="' + i + '" type="button"><span class="k">' + "ABCD"[i] + '</span><span class="t">' + esc(o.t) + '</span></button><button class="spk" data-s="' + i + '" type="button" aria-label="Hear option ' + "ABCD"[i] + '">' + SPK + '</button></div>').join("");
+  $("choices").innerHTML = R.mc.opts.map((o, i) => '<div class="optrow"><button class="opt" data-i="' + i + '" type="button"><span class="k">' + "ABCD"[i] + '</span><span class="t">' + esc(o.t) + '</span></button><button class="spk" data-s="' + i + '" type="button" aria-label="Hear option ' + "ABCD"[i] + '">' + SPK + '</button></div>').join("") +
+    (hintsLeft() > 0 && R.kind !== "test" ? '<button class="hint50" id="hint50" type="button">✂️ 50/50 hint · ' + hintsLeft() + '</button>' : "");
 }
 $("choices").addEventListener("click", e => {
+  if (e.target.closest("#hint50")){
+    if (!R || R.phase !== "ask" || R.style !== "mc" || R.hintQ === R.cur.n || hintsLeft() < 1) return;
+    const wrong = R.mc.opts.map((o, i) => o.ok ? -1 : i).filter(i => i >= 0).sort(() => Math.random() - .5).slice(0, 2);
+    R.hintQ = R.cur.n; S.hintsUsed = (S.hintsUsed || 0) + 1; save();
+    [...document.querySelectorAll("#choices .opt")].forEach((b, j) => { if (wrong.includes(j)){ b.disabled = true; b.classList.add("gone"); } });
+    const h = $("hint50"); if (h){ h.disabled = true; h.textContent = "✂️ Hint used"; }
+    sfx.tap(); return;
+  }
   const sp = e.target.closest(".spk"); if (sp){ if (R && R.mc) speak(R.mc.opts[+sp.dataset.s].t); return; }
   const b = e.target.closest(".opt"); if (b) pick(+b.dataset.i);
 });
@@ -1653,8 +1707,9 @@ function mergeProgress(row){
   if (d.mockXp) S.mockXp = true;
   if (d.hatched) S.hatched = true;
   ensureEco();
-  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil"].forEach(k => { S[k] = Math.max(S[k] || 0, +d[k] || 0); });
+  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil", "shieldBought", "shieldUsed", "hintsBought", "hintsUsed"].forEach(k => { S[k] = Math.max(S[k] || 0, +d[k] || 0); });
   Object.keys(d.ach || {}).forEach(k => { if (!S.ach[k]) S.ach[k] = d.ach[k]; });
+  Object.keys(d.own || {}).forEach(k => { if (!S.own[k]) S.own[k] = d.own[k]; });
   Object.keys(d.st || {}).forEach(k => { S.st[k] = Math.max(S.st[k] || 0, +d.st[k] || 0); });
   if (d.mis && d.mis.list){
     if (!S.mis || d.mis.day > S.mis.day) S.mis = d.mis;
@@ -1675,7 +1730,7 @@ async function cloudPull(){
 function cloudPush(){ if (!SB || !SESS) return; clearTimeout(pushT); pushT = setTimeout(doPush, 2500); }
 async function doPush(){
   if (!(await ensureSess())) { cloudMsg = "Signed out. Sign in again to keep syncing."; return; }
-  const row = {user_id: SESS.user.id, name: S.name || null, state: S.state || null, xp: S.xp, streak: S.days, last_day: S.last || null, played: S.played, passed: S.passed, data: {q: S.q, hist: S.hist, style: S.style, autoRead: S.autoRead, sound: S.sound, mock: S.mock, mockXp: S.mockXp, hatched: S.hatched, coinsEarned: S.coinsEarned, coinsSpent: S.coinsSpent, gemsEarned: S.gemsEarned, gemsSpent: S.gemsSpent, bonusUntil: S.bonusUntil, ach: S.ach, st: S.st, mis: S.mis}};
+  const row = {user_id: SESS.user.id, name: S.name || null, state: S.state || null, xp: S.xp, streak: S.days, last_day: S.last || null, played: S.played, passed: S.passed, data: {q: S.q, hist: S.hist, style: S.style, autoRead: S.autoRead, sound: S.sound, mock: S.mock, mockXp: S.mockXp, hatched: S.hatched, coinsEarned: S.coinsEarned, coinsSpent: S.coinsSpent, gemsEarned: S.gemsEarned, gemsSpent: S.gemsSpent, bonusUntil: S.bonusUntil, ach: S.ach, st: S.st, mis: S.mis, shieldBought: S.shieldBought, shieldUsed: S.shieldUsed, hintsBought: S.hintsBought, hintsUsed: S.hintsUsed, own: S.own}};
   try {
     const r = await sbFetch("/rest/v1/libby_progress?on_conflict=user_id", {method: "POST", headers: {Prefer: "resolution=merge-duplicates,return=minimal"}, body: JSON.stringify(row)});
     cloudMsg = r.ok ? "Saved to your account at " + new Date().toLocaleTimeString() : "Could not save (" + r.status + ")";
