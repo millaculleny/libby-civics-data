@@ -395,6 +395,48 @@ body.onhome #view{padding:10px 10px 12px}
  .hv-chip{font-size:14px}.hv-logo{font-size:18px}.hv-logo img{width:38px;height:38px}
 }
 @media (prefers-reduced-motion:reduce){.hv-fl{animation:none}}
+/* ---------- home: phone review (390x844 and 320x700) ---------- */
+.hv-next{position:relative;z-index:1;display:inline-block;max-width:100%;margin-top:6px;padding:3px 12px;border-radius:14px;background:rgba(255,210,60,.95);color:#4a3200;font-weight:900;font-size:12.5px;line-height:1.25;white-space:normal;text-shadow:none;border:2px solid #fff4c2}
+.hv-evo .stages{overflow-x:auto;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;padding-bottom:4px}
+.hv-evo .stg{scroll-snap-align:center}
+.hv-sk button .t2{display:block}
+@media (max-width:520px){
+ body.onhome #view{padding:6px 6px 10px}
+ .hv{padding:10px 10px 0;gap:9px;border-radius:22px;min-height:0}
+ .hv-top{gap:7px 8px}
+ .hv-logo img{width:36px;height:36px}.hv-logo{font-size:17px}
+ .hv-lvl{padding:3px 10px 3px 3px}.hv-lvl img{width:30px;height:30px}.hv-lvl .t{font-size:13px}.hv-lvl .t i{height:8px;margin:2px 0}
+ .hv-chip{font-size:13px;padding:2px 6px 2px 6px}.hv-chip svg{width:20px;height:20px}
+ .hv-ico .hv-ib{width:34px;height:34px}.hv-ico .hv-ib svg{width:18px;height:18px}
+ .hv-fl{width:min(34%,118px)}
+ .hv-libby{margin:-2px 0 -6px}
+ .hv-body{gap:9px}
+ .hv-cards{gap:9px}
+ .hv-card{min-height:190px;padding:8px 12px 58px;border-width:3px}
+ .hv-card h3{font-size:25px;margin:2px 0 3px}.hv-card h3 small{font-size:.6em}
+ .hv-card p{font-size:14px;line-height:1.25}
+ .hv-play{height:40px;bottom:9px;width:min(68%,230px)}.hv-play svg{width:22px;height:22px}
+ .hv-evo{padding:26px 6px 8px}
+ .hv-evo .stg{flex:0 0 17.6%;min-width:62px}
+ .hv-evo .stg .sc{width:clamp(48px,15vw,66px)}
+ .hv-evo .stg b{font-size:13px}.hv-evo .stg small{font-size:11px}
+ .hv-skills{padding:8px 8px 10px}
+ .hv-bar button{font-size:10.5px}
+}
+@media (max-width:380px){
+ .hv{padding:8px 8px 0}
+ .hv-logo{font-size:15px}.hv-logo img{width:32px;height:32px}
+ .hv-ico{gap:4px}.hv-ico .hv-ib{width:32px;height:32px}
+ .hv-card{min-height:188px;padding:8px 10px 56px}
+ .hv-card h3{font-size:23px}.hv-card p{font-size:13.5px}
+ .hv-next{font-size:12px;padding:3px 9px}
+ .hv-evo .stg{flex:0 0 76px}
+ .hv-evo .stg small{font-size:11px}
+ .hv-sk{grid-template-columns:repeat(3,1fr)}
+ .hv-sk button{min-height:78px;font-size:11px}
+ .hv-bar{gap:0}.hv-bar button{font-size:10px}.hv-bar button svg{width:30px;height:30px}
+}
+
 
 /* ---------- home: Libby + two big cards ---------- */
 body.onhome #app{max-width:1000px}
@@ -819,7 +861,7 @@ const MIS_POOL = [
   {id:"streak",   t:"Get 5 in a row",           need:5,  coins:15, ev:"streak", max:true},
   {id:"simulado", t:"Finish a practice test", need:1,  coins:20, ev:"simulado"},
   {id:"review",   t:"Review your mistakes",           need:1,  coins:15, ev:"review"},
-  {id:"challenge", t:"Win a Challenge round", need:1, coins:25, ev:"challengeWin"}
+  {id:"challenge", t:"Win a Weak Spots Challenge", need:1, coins:25, ev:"challengeWin"}
 ];
 function ensureMis(){
   ensureEco(); const today = dayStr(new Date());
@@ -859,8 +901,8 @@ const ACH = [
   {id:"perf",   ic:"✨", t:"Flawless",          d:"Finish a level with no mistakes",      ok:() => (S.st.perfect || 0) >= 1,    coins:20},
   {id:"s3",     ic:"🔥", t:"Getting in rhythm",    d:"Study 3 days in a row",       ok:() => (S.days || 0) >= 3,          coins:15},
   {id:"s7",     ic:"🔥", t:"Week on fire",     d:"Study 7 days in a row",       ok:() => (S.days || 0) >= 7,          coins:50, gems:1},
-  {id:"chal1", ic:"⚔️", t:"Challenge accepted", d:"Finish a Challenge round", ok:() => (S.st.challenges || 0) >= 1, coins:15},
-  {id:"chal3", ic:"🥇", t:"Challenge champion", d:"Win 3 Challenge rounds", ok:() => (S.st.wins || 0) >= 3, coins:60, gems:1},
+  {id:"chal1", ic:"⚔️", t:"Challenge accepted", d:"Finish a Weak Spots Challenge", ok:() => (S.st.challenges || 0) >= 1, coins:15},
+  {id:"chal3", ic:"🥇", t:"Challenge champion", d:"Win 3 Weak Spots Challenges", ok:() => (S.st.wins || 0) >= 3, coins:60, gems:1},
   {id:"sim",    ic:"🎓", t:"Test passed",  d:"Pass a practice test",    ok:() => (S.passed || 0) >= 1,        coins:40, gems:1},
   {id:"kid",    ic:"🐥", t:"Libby grew up",      d:"Libby reaches Kid",               ok:() => stageIdx() >= 2,             coins:20},
   {id:"teen",   ic:"🦅", t:"Teenager",        d:"Libby reaches Teen",              ok:() => stageIdx() >= 3,             coins:30},
@@ -997,6 +1039,12 @@ const ART_CHAL = '<svg class="art" viewBox="0 0 300 220" preserveAspectRatio="xM
   Array.from({length: 18}, (_, i) => '<path transform="translate(' + (14 + (i % 6) * 24) + ' ' + (16 + Math.floor(i / 6) * 26) + ') scale(.5)" d="M0-9l2.6 5.4 5.9.8-4.3 4.1 1 5.9L0 3.4l-5.2 2.8 1-5.9-4.3-4.1 5.9-.8z" fill="#fff"/>').join("") +
   '<g transform="translate(205 20) rotate(8)"><rect x="0" y="12" width="76" height="98" rx="8" fill="#e9eefb" stroke="#6b7fb0" stroke-width="3"/><rect x="22" y="2" width="32" height="18" rx="6" fill="#8aa0d4" stroke="#4a5c8c" stroke-width="2.5"/><path d="M12 38l7 7 12-14M12 62l7 7 12-14M12 86l7 7 12-14" stroke="#2bb34a" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M40 38h26M40 62h26M40 86h26" stroke="#9db0d6" stroke-width="4" stroke-linecap="round"/></g>' +
   '<g transform="translate(95 4)"><path d="M0 22l52-20 52 20-52 20z" fill="#14284b" stroke="#0a1633" stroke-width="2"/><path d="M22 34v16c0 8 60 8 60 0V34l-30 11z" fill="#1d3f8f" stroke="#0a1633" stroke-width="2"/><path d="M96 24v28" stroke="#ffd23c" stroke-width="3"/><circle cx="96" cy="55" r="5" fill="#ffd23c"/></g></svg>';
+function nextLevelInfo(){
+  const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length;
+  const id = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
+  if (id < 0) return "All " + LESSONS.length + " levels complete! 🎉";
+  return "Next: Level " + (id + 1) + " of " + LESSONS.length + " · " + UNITS[LESSONS[id].unit].name;
+}
 function vHome(){
   const si = stageIdx(), tm = totalMastered(), pct = Math.round(tm / 128 * 100);
   const strip = STAGE_DEF.map((s, i) => i === 0 ? "" : '<div class="stg ' + (i === si ? "cur" : i < si ? "past" : "fut") + '"><span class="sc"><img src="' + IMG[s[0]] + '" alt=""></span><b>' + s[2] + '</b><small>' + (i === si ? "Now" : i < si ? "Done" : esc(stageNeed(i))) + '</small></div>').join("");
@@ -1017,16 +1065,16 @@ function vHome(){
     '<div class="hv-body">' +
      '<div class="hv-libby' + (S.own && S.own.halo ? ' halo' : '') + '"><div class="hv-fl">' + M() + '</div></div>' +
      '<div class="hv-cards">' +
-      '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p>' + play + '</div>' +
+      '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p><span class="hv-next">' + esc(nextLevelInfo()) + '</span>' + play + '</div>' +
       '<div class="hv-card chal" role="button" tabindex="0" data-hg="test">' + ART_CHAL + '<h3><small>Citizenship</small>Challenge</h3><p>Practice for the U.S. citizenship interview.</p>' + play + '</div>' +
      '</div>' +
      '<div class="hv-evo"><span class="hv-rib">Your Eagle Evolution</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
      '<div class="hv-skills"><h4>' + HI.starc + 'New Skills</h4><div class="hv-sk">' +
-       sk("bonus", HI.bolt, bonusOn() ? "Bonus ON" : "XP Bonus") + sk("voice", HI.mic, "Voice Practice") + sk("challenge", HI.target, "Challenge Mode") + sk("soon:Beat the Clock", HI.clock, "Beat the Clock", 1) + sk("soon:Special Animations", HI.wings, "Special Animations", 1) +
+       sk("bonus", HI.bolt, bonusOn() ? "Bonus ON" : "XP Bonus") + sk("voice", HI.mic, "Voice Practice") + sk("challenge", HI.target, "Weak Spots Challenge") + sk("soon:Beat the Clock", HI.clock, "Beat the Clock", 1) + sk("soon:Special Animations", HI.wings, "Special Animations", 1) +
      '</div></div>' +
     '</div>' +
     '<nav class="hv-bar" aria-label="Menu">' +
-     bar("learn", HI.map, "Levels") + bar("missions", HI.mission, "Missions", 0, misClaimable()) + bar("ach", HI.medal, "Achievements", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("shop", HI.chest, "Rewards") + bar("test", HI.guide, "Test Guide") +
+     bar("learn", HI.map, "Levels") + bar("missions", HI.mission, "Missions", 0, misClaimable()) + bar("ach", HI.medal, "Awards", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("shop", HI.chest, "Rewards") + bar("test", HI.guide, "Test Guide") +
     '</nav>' +
    '</section>';
 }
@@ -1035,8 +1083,9 @@ $("view").addEventListener("click", e => {
   const g = b.dataset.hg; sfx.tap();
   if (g.startsWith("soon:")) toast(g.slice(5) + ": coming soon!");
   else if (g === "voice") startTest("test");
+  else if (g === "learn"){ window._scrolled = 0; go("learn"); }
   else if (g === "bonus") showBonus();
-  else if (g === "challenge") startChallenge();
+  else if (g === "challenge") showChallengeInfo();
   else go(g);
 });
 $("view").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".hv-card")){ e.preventDefault(); e.target.click(); } });
@@ -1336,13 +1385,21 @@ function startTest(mode){
   else { const m = shuffle(missedIds()).slice(0,12); if (m.length) begin({kind:"review", label:"Mistakes review", deck:m, need:0}); }
 }
 /* Challenge Mode: 10 of your weakest questions, multiple choice, trickiest wrong options, one pass, win with 8 */
+function showChallengeInfo(){
+  const old = $("fxm"); if (old) old.remove();
+  const el = document.createElement("div"); el.id = "fxm"; el.setAttribute("role", "dialog");
+  el.innerHTML = '<div class="box"><h3>⚔️ Weak Spots Challenge</h3><p>10 questions picked from the ones you miss the most, with the trickiest answer options.</p><p><b>Win by getting 8 out of 10 right.</b> You earn +20 bonus coins and a Challenge win. It is a single pass: mistakes are not repeated.</p><div class="row"><button class="btn ghost" id="fxClose" type="button">Not now</button><button class="btn" id="fxGo" type="button">Start</button></div></div>';
+  document.body.appendChild(el);
+  $("fxClose").onclick = () => el.remove(); el.onclick = e => { if (e.target === el) el.remove(); };
+  $("fxGo").onclick = () => { el.remove(); startChallenge(); };
+}
 function startChallenge(){
   HARD = true;
   const scored = QS.map(q => { const r = S.q[q.n]; return {q, s: r ? (r.w || 0) * 3 - (r.c || 0) + (r.last === "w" ? 6 : 0) : 1, r: Math.random()}; })
     .filter(x => { try { return !!choicesFor(x.q); } catch(e){ return false; } });
   HARD = false;
   scored.sort((a, b) => (b.s + b.r * 2) - (a.s + a.r * 2));
-  begin({kind:"challenge", hard:true, label:"Challenge", deck: shuffle(scored.slice(0, 10).map(x => x.q)), need:0});
+  begin({kind:"challenge", hard:true, label:"Weak Spots Challenge", deck: shuffle(scored.slice(0, 10).map(x => x.q)), need:0});
 }
 function begin(o){
   ASR.abort();
@@ -1628,7 +1685,7 @@ function renderResult(first){
   }
   $("res").innerHTML = '<div class="big bob" id="resM">' + M() + '</div><h1>' + title + '</h1><p class="sub">' + sub + '</p>' + (stageIdx() > R.stage0 ? '<div class="evolve">Libby grew up! She is now a ' + STAGE_DEF[stageIdx()][1] + '.</div>' : '') +
    '<div class="tiles"><div class="tile g"><b>+' + R.xp + '</b><span>XP</span></div><div class="tile b"><b>' + R.correct + "/" + asked + '</b><span>Correct</span></div><div class="tile r"><b>' + acc + '%</b><span>Accuracy</span></div></div>' + review +
-   '<div class="spacer"></div><div style="width:100%;display:grid;gap:10px"><button class="btn" id="resOk" type="button">Continue</button>' + (test ? '<button class="btn ghost" id="resAgain" type="button">Try another simulado</button>' : R.kind === "challenge" ? '<button class="btn ghost" id="resAgain" type="button">Play another Challenge</button>' : "") + (R.kind === "lesson" && R.lessonPass === false ? '<button class="btn gline" id="resRetry" type="button">Try this level again</button>' : "") + '</div>';
+   '<div class="spacer"></div><div style="width:100%;display:grid;gap:10px"><button class="btn" id="resOk" type="button">Continue</button>' + (test ? '<button class="btn ghost" id="resAgain" type="button">Try another simulado</button>' : R.kind === "challenge" ? '<button class="btn ghost" id="resAgain" type="button">Play another Weak Spots Challenge</button>' : "") + (R.kind === "lesson" && R.lessonPass === false ? '<button class="btn gline" id="resRetry" type="button">Try this level again</button>' : "") + '</div>';
   mood($("resM"), mdl);
   if (first){ if (R.kind === "challenge" ? R.won : ((!test && R.lessonPass !== false) || (test && R.passed))){ sfx.win(); confetti(); } else sfx.bad(); }
   $("resOk").onclick = () => { $("res").hidden = true; R = null; go(TAB); };
