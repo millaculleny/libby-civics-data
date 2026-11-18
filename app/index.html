@@ -275,6 +275,37 @@ footer.fine a{color:inherit}
 .stg.past .sc{border-color:var(--gold)}
 .stg.cur{color:var(--gold-d)}
 .stg.cur .sc{border-color:var(--gold);background:#fff4d6;box-shadow:0 0 0 4px rgba(230,169,43,.25)}
+/* ---------- coins, missions, achievements, XP bonus ---------- */
+.fx-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.fx-head h2{margin:0;font-size:24px;font-weight:900;flex:1}
+.fx-back{border:2px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:6px 14px;font-weight:900;cursor:pointer}
+.fx-wallet{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.fx-wallet span{display:inline-flex;align-items:center;gap:6px;background:linear-gradient(#2a64c9,#173f8f);color:#fff;border:2px solid #7fb0ff;border-radius:99px;padding:3px 12px 3px 8px;font-weight:900}
+.fx-wallet svg{width:22px;height:22px}
+.fx-list{display:grid;gap:10px}
+.fx-it{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:2px solid var(--line);border-radius:18px;padding:12px 14px;box-shadow:var(--lift)}
+.fx-it.done{border-color:#2bb34a;background:linear-gradient(var(--card),var(--card))}
+.fx-it.locked{opacity:.65}
+.fx-ic{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--soft);font-size:26px}
+.fx-it.done .fx-ic{background:#d9f6df}
+.fx-it b{display:block;font-size:16px;font-weight:900}
+.fx-it small{display:block;color:var(--mute);font-weight:700;margin-top:1px}
+.fx-bar{height:9px;border-radius:9px;background:var(--soft);margin-top:7px;overflow:hidden}
+.fx-bar i{display:block;height:100%;background:linear-gradient(#ffe27a,#f2a900);border-radius:9px}
+.fx-rw{display:inline-flex;align-items:center;gap:4px;font-weight:900;font-size:13px;color:var(--gold-d);margin-top:4px;margin-right:8px}
+.fx-rw svg{width:16px;height:16px}
+.fx-btn{border:0;border-radius:14px;padding:10px 14px;font-weight:900;color:#fff;background:#2bb34a;border-bottom:4px solid #1f8a37;cursor:pointer}
+.fx-btn[disabled]{background:#c9ccd8;border-bottom-color:#a5a9ba;cursor:default}
+.fx-btn.claimed{background:#e3e8f2;color:#6b7690;border-bottom-color:#c5cddd}
+.fx-sum{font-weight:800;color:var(--mute);margin:2px 0 12px}
+.hv-bar .hv-badge,.hv-ib .hv-badge{position:absolute;top:0;right:8px;min-width:20px;height:20px;border-radius:99px;background:#e53935;color:#fff;font-size:12px;font-weight:900;display:grid;place-items:center;padding:0 5px;border:2px solid #fff;text-shadow:none}
+.hv-ib{position:relative}.hv-ib .hv-badge{top:-4px;right:-4px}
+#fxm{position:fixed;inset:0;z-index:60;background:rgba(5,15,40,.65);display:grid;place-items:center;padding:20px}
+#fxm .box{width:min(92vw,380px);background:var(--card);color:var(--ink);border-radius:24px;border:4px solid #ffd23c;padding:18px;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,.5);display:grid;gap:10px}
+#fxm h3{margin:0;font-size:22px;font-weight:900}
+#fxm p{margin:0;font-weight:700;color:var(--mute)}
+#fxm .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
 /* ---------- home v2: game-style screen (art in SVG/CSS) ---------- */
 body.onhome #app{max-width:1180px}
 body.onhome header.top{display:none}
@@ -636,7 +667,7 @@ const IC = {
 
 /* ---------- state ---------- */
 let KEY = "libbycivics.v2";
-const freshState = () => ({style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], mock:{}, mockXp:false, onboarded:false, hatched:false});
+const freshState = () => ({style:"mc", autoRead:false, name:"", state:"", xp:0, days:0, last:"", q:{}, done:{}, sound:true, played:0, passed:0, best:0, hist:[], mock:{}, mockXp:false, onboarded:false, hatched:false, coinsEarned:0, coinsSpent:0, gemsEarned:0, gemsSpent:0, bonusUntil:0, mis:null, ach:{}, st:{answered:0, correct:0, perfect:0}});
 let S = freshState();
 try { const x = JSON.parse(localStorage.getItem(KEY)||"null"); if (x && x.q) S = Object.assign(S, x); } catch(e){}
 function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} if (typeof cloudPush === "function") cloudPush(); }
@@ -751,10 +782,132 @@ function nav(){
 }
 function go(t){ TAB = t; document.body.classList.toggle("onhome", t === "home"); nav(); render(); window.scrollTo(0,0); }
 $("navBtns").addEventListener("click", e => { const b = e.target.closest("button"); if (b){ sfx.tap(); go(b.dataset.tab); } });
-function render(){ topbar(); document.body.classList.toggle("onhome", TAB === "home"); ({home:vHome,learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); checkEvolve(); }
+function render(){ topbar(); document.body.classList.toggle("onhome", TAB === "home"); ({home:vHome,missions:vMissions,ach:vAch,learn:vLearn,test:vTest,cards:vCards,me:vMe})[TAB](); checkEvolve(); }
 
 const lessonOpen = L => !!S.unlockAll || L.id === 0 || !!S.done[LESSONS[L.id - 1].id] || mastered(LESSONS[L.id - 1]) >= LESSONS[L.id - 1].qs.length;
 const LOCK = '<svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="3" fill="currentColor"/><path d="M8 10V8a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/></svg>';
+
+/* ---------- economy: coins, gems, XP bonus, daily missions, achievements ---------- */
+function ensureEco(){
+  if (!S.st) S.st = {answered:0, correct:0, perfect:0};
+  if (!S.ach) S.ach = {};
+  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil"].forEach(k => { if (typeof S[k] !== "number") S[k] = 0; });
+}
+const coins = () => { ensureEco(); return Math.max(0, S.coinsEarned - S.coinsSpent); };
+const gems = () => { ensureEco(); return Math.max(0, S.gemsEarned - S.gemsSpent); };
+const giveCoins = n => { ensureEco(); S.coinsEarned += n; };
+const giveGems = n => { ensureEco(); S.gemsEarned += n; };
+const bonusOn = () => (S.bonusUntil || 0) > Date.now();
+const BONUS_COST = 30, BONUS_MIN = 15;
+const MIS_POOL = [
+  {id:"answer",   t:"Responda 10 perguntas",       need:10, coins:10, ev:"answer"},
+  {id:"correct",  t:"Acerte 8 perguntas",          need:8,  coins:15, ev:"correct"},
+  {id:"lesson",   t:"Passe de um nível",           need:1,  coins:20, ev:"lesson"},
+  {id:"streak",   t:"Acerte 5 seguidas",           need:5,  coins:15, ev:"streak", max:true},
+  {id:"simulado", t:"Termine um teste de prática", need:1,  coins:20, ev:"simulado"},
+  {id:"review",   t:"Revise seus erros",           need:1,  coins:15, ev:"review"}
+];
+function ensureMis(){
+  ensureEco(); const today = dayStr(new Date());
+  if (!S.mis || S.mis.day !== today){
+    const dn = Math.floor(Date.now() / 864e5), a = dn % MIS_POOL.length;
+    S.mis = {day: today, bonusGiven: false, list: [0, 2, 4].map(k => ({id: MIS_POOL[(a + k) % MIS_POOL.length].id, got: 0, claimed: false}))};
+  }
+  return S.mis;
+}
+function misEvent(ev, n){
+  const M = ensureMis(); let ch = false;
+  M.list.forEach(m => {
+    const d = MIS_POOL.find(x => x.id === m.id); if (!d || d.ev !== ev || m.claimed) return;
+    const v = d.max ? Math.max(m.got, n) : m.got + n, c = Math.min(d.need, v);
+    if (c !== m.got){ m.got = c; ch = true; }
+  });
+  return ch;
+}
+const misClaimable = () => ensureMis().list.filter(m => { const d = MIS_POOL.find(x => x.id === m.id); return d && !m.claimed && m.got >= d.need; }).length;
+function claimMis(id){
+  const M = ensureMis(), m = M.list.find(x => x.id === id), d = MIS_POOL.find(x => x.id === id);
+  if (!m || !d || m.claimed || m.got < d.need) return;
+  m.claimed = true; giveCoins(d.coins);
+  if (M.list.every(x => x.claimed) && !M.bonusGiven){ M.bonusGiven = true; giveGems(1); toast("Todas as missões de hoje! +1 gema"); }
+  sfx.win(); save(); vMissions(); topbar();
+}
+const ACH = [
+  {id:"first",  ic:"🎯", t:"Primeiros passos",   d:"Responda 1 pergunta",             ok:() => (S.st.answered || 0) >= 1,   coins:5},
+  {id:"ans100", ic:"💬", t:"Boa de papo",        d:"Responda 100 perguntas",          ok:() => (S.st.answered || 0) >= 100, coins:30},
+  {id:"m10",    ic:"📘", t:"Aquecendo",          d:"Domine 10 perguntas",             ok:() => totalMastered() >= 10,       coins:10},
+  {id:"m50",    ic:"📗", t:"Metade do caminho",  d:"Domine 50 perguntas",             ok:() => totalMastered() >= 50,       coins:30, gems:1},
+  {id:"m100",   ic:"📙", t:"Quase lá",           d:"Domine 100 perguntas",            ok:() => totalMastered() >= 100,      coins:60, gems:2},
+  {id:"m128",   ic:"🏅", t:"Mestre do teste",    d:"Domine as 128 perguntas",         ok:() => totalMastered() >= 128,      coins:150, gems:5},
+  {id:"l1",     ic:"🚩", t:"Primeiro nível",     d:"Passe de 1 nível",                ok:() => doneLessons() >= 1,          coins:10},
+  {id:"l10",    ic:"🗺️", t:"Explorador",         d:"Passe de 10 níveis",              ok:() => doneLessons() >= 10,         coins:50, gems:1},
+  {id:"l20",    ic:"🏆", t:"Trilha completa",    d:"Passe dos 20 níveis",             ok:() => doneLessons() >= 20,         coins:120, gems:3},
+  {id:"perf",   ic:"✨", t:"Sem errar",          d:"Termine um nível sem erros",      ok:() => (S.st.perfect || 0) >= 1,    coins:20},
+  {id:"s3",     ic:"🔥", t:"Pegando o ritmo",    d:"3 dias seguidos estudando",       ok:() => (S.days || 0) >= 3,          coins:15},
+  {id:"s7",     ic:"🔥", t:"Semana de fogo",     d:"7 dias seguidos estudando",       ok:() => (S.days || 0) >= 7,          coins:50, gems:1},
+  {id:"sim",    ic:"🎓", t:"Aprovado no teste",  d:"Passe em um teste de prática",    ok:() => (S.passed || 0) >= 1,        coins:40, gems:1},
+  {id:"kid",    ic:"🐥", t:"Libby cresceu",      d:"Libby chega a Kid",               ok:() => stageIdx() >= 2,             coins:20},
+  {id:"teen",   ic:"🦅", t:"Adolescente",        d:"Libby chega a Teen",              ok:() => stageIdx() >= 3,             coins:30},
+  {id:"adult",  ic:"🦅", t:"Adulta",             d:"Libby chega a Adult",             ok:() => stageIdx() >= 4,             coins:40},
+  {id:"cit",    ic:"🇺🇸", t:"Cidadã",             d:"Libby vira Citizen",              ok:() => stageIdx() >= 5,             coins:80, gems:2}
+];
+const achClaimable = () => { ensureEco(); return ACH.filter(a => !S.ach[a.id] && a.ok()).length; };
+function claimAch(id){
+  ensureEco(); const a = ACH.find(x => x.id === id); if (!a || S.ach[id] || !a.ok()) return;
+  S.ach[id] = Date.now(); giveCoins(a.coins || 0); if (a.gems) giveGems(a.gems);
+  sfx.win(); confetti(); save(); vAch(); topbar();
+}
+/* hooks called from the lesson / test flow */
+function onAnswer(ok){
+  ensureEco(); S.st.answered++; misEvent("answer", 1);
+  if (ok){ S.st.correct++; giveCoins(1); misEvent("correct", 1); }
+  if (R && R.streak) misEvent("streak", R.streak);
+}
+function onFinish(){
+  ensureEco(); let c = 0;
+  if (R.kind === "lesson" && R.lessonPass){
+    c += 10; misEvent("lesson", 1);
+    if (R.lessonFc === R.lessonN && R.lessonN > 0){ S.st.perfect++; c += 5; }
+  }
+  if (R.kind === "test"){ misEvent("simulado", 1); if (R.passed) c += 25; }
+  if (R.kind === "review") misEvent("review", 1);
+  if (c){ giveCoins(c); R.coinsWon = c; setTimeout(() => toast("+" + c + " moedas"), 600); }
+}
+function showBonus(){
+  ensureEco(); const old = $("fxm"); if (old) old.remove();
+  const el = document.createElement("div"); el.id = "fxm"; el.setAttribute("role", "dialog");
+  const left = Math.max(0, Math.ceil(((S.bonusUntil || 0) - Date.now()) / 60000));
+  el.innerHTML = '<div class="box"><h3>⚡ Bônus de XP</h3>' + (bonusOn() ? '<p>Ativo! Você ganha o <b>dobro de XP</b> nas perguntas por mais <b>' + left + ' min</b>.</p><button class="btn" id="fxClose" type="button">Continuar estudando</button>' :
+    '<p>Ganhe o <b>dobro de XP</b> em cada pergunta por ' + BONUS_MIN + ' minutos.</p><p>Custa <b>' + BONUS_COST + ' moedas</b>. Você tem <b>' + coins() + '</b>.</p><div class="row"><button class="btn ghost" id="fxClose" type="button">Agora não</button><button class="btn" id="fxGo" type="button"' + (coins() < BONUS_COST ? " disabled" : "") + '>Ativar</button></div>' + (coins() < BONUS_COST ? '<p style="font-size:13px">Ganhe moedas acertando perguntas, passando de nível e cumprindo missões.</p>' : "")) + '</div>';
+  document.body.appendChild(el);
+  $("fxClose").onclick = () => el.remove();
+  el.onclick = e => { if (e.target === el) el.remove(); };
+  const go_ = $("fxGo"); if (go_) go_.onclick = () => { if (coins() < BONUS_COST) return; S.coinsSpent += BONUS_COST; S.bonusUntil = Date.now() + BONUS_MIN * 60000; save(); sfx.win(); el.remove(); toast("Bônus de XP ativado por " + BONUS_MIN + " min!"); if (TAB === "home") vHome(); };
+}
+function fxHead(title){ return '<div class="fx-head"><button class="fx-back" type="button" data-hg="home">← Home</button><h2>' + title + '</h2></div><div class="fx-wallet"><span>' + HI.coin + coins() + ' moedas</span><span>' + HI.gem + gems() + ' gemas</span><span>' + HI.starc + S.xp + ' XP</span></div>'; }
+function vMissions(){
+  const M = ensureMis(), left = M.list.filter(m => !m.claimed).length;
+  const rows = M.list.map(m => {
+    const d = MIS_POOL.find(x => x.id === m.id), ok = m.got >= d.need, pct = Math.round(m.got / d.need * 100);
+    return '<div class="fx-it' + (m.claimed ? " done" : "") + '"><span class="fx-ic">' + (m.claimed ? "✅" : "🎯") + '</span><div><b>' + d.t + '</b><small>' + m.got + ' / ' + d.need + '</small><div class="fx-bar"><i style="width:' + pct + '%"></i></div><span class="fx-rw">' + HI.coin + '+' + d.coins + '</span></div>' +
+      (m.claimed ? '<button class="fx-btn claimed" type="button" disabled>Resgatado</button>' : '<button class="fx-btn" type="button" data-claim="' + m.id + '"' + (ok ? "" : " disabled") + '>Resgatar</button>') + '</div>';
+  }).join("");
+  $("view").innerHTML = fxHead("Missões") + '<p class="fx-sum">Novas missões todo dia. ' + (left ? "Faltam " + left + " hoje." : "Você cumpriu todas hoje! 🎉") + ' Cumpra as 3 e ganhe +1 gema.</p><div class="fx-list">' + rows + '</div>';
+}
+function vAch(){
+  ensureEco(); const got = ACH.filter(a => S.ach[a.id]).length;
+  const rows = ACH.map(a => {
+    const claimed = !!S.ach[a.id], ok = a.ok();
+    const rw = '<span class="fx-rw">' + HI.coin + '+' + (a.coins || 0) + '</span>' + (a.gems ? '<span class="fx-rw">' + HI.gem + '+' + a.gems + '</span>' : "");
+    return '<div class="fx-it' + (claimed ? " done" : ok ? "" : " locked") + '"><span class="fx-ic">' + (ok || claimed ? a.ic : "🔒") + '</span><div><b>' + a.t + '</b><small>' + a.d + '</small>' + rw + '</div>' +
+      (claimed ? '<button class="fx-btn claimed" type="button" disabled>Resgatado</button>' : '<button class="fx-btn" type="button" data-claimA="' + a.id + '"' + (ok ? "" : " disabled") + '>' + (ok ? "Resgatar" : "Bloqueada") + '</button>') + '</div>';
+  }).join("");
+  $("view").innerHTML = fxHead("Conquistas") + '<p class="fx-sum">' + got + ' de ' + ACH.length + ' conquistas resgatadas.</p><div class="fx-list">' + rows + '</div>';
+}
+$("view").addEventListener("click", e => {
+  const c = e.target.closest("[data-claim]"); if (c && !c.disabled){ sfx.tap(); claimMis(c.dataset.claim); return; }
+  const a = e.target.closest("[data-claimA]"); if (a && !a.disabled){ sfx.tap(); claimAch(a.dataset.claima || a.getAttribute("data-claimA")); }
+});
 
 /* ---------- home view (game-style) ---------- */
 const STAGE_LEVELS = [0, 0, 4, 9, 14, 19];   /* finished levels needed for each stage index (same numbers as stageIdx) */
@@ -796,17 +949,18 @@ function vHome(){
   const si = stageIdx(), tm = totalMastered(), pct = Math.round(tm / 128 * 100);
   const strip = STAGE_DEF.map((s, i) => i === 0 ? "" : '<div class="stg ' + (i === si ? "cur" : i < si ? "past" : "fut") + '"><span class="sc"><img src="' + IMG[s[0]] + '" alt=""></span><b>' + s[2] + '</b><small>' + (i === si ? "Now" : i < si ? "Done" : esc(stageNeed(i))) + '</small></div>').join("");
   const nxt = si < 5 ? STAGE_DEF[si + 1][1] + ": " + (stageNeed(si + 1) || "ready") : "Libby is a Citizen!";
-  const ib = (go, ic, lab) => '<button class="hv-ib" type="button" data-hg="' + go + '" aria-label="' + lab + '">' + ic + '</button>';
+  const bdg = n => n > 0 ? '<span class="hv-badge">' + n + '</span>' : "";
+  const ib = (go, ic, lab, n) => '<button class="hv-ib" type="button" data-hg="' + go + '" aria-label="' + lab + '">' + ic + bdg(n) + '</button>';
   const sk = (go, ic, lab, soon) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Em breve</span>' : "") + ic + '<span>' + lab + '</span></button>';
-  const bar = (go, ic, lab, soon) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Em breve</span>' : "") + ic + '<span>' + lab + '</span></button>';
+  const bar = (go, ic, lab, soon, n) => '<button type="button" data-hg="' + go + '">' + (soon ? '<span class="soon">Em breve</span>' : "") + bdg(n) + ic + '<span>' + lab + '</span></button>';
   const play = '<span class="hv-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></span>';
   $("view").innerHTML =
    '<section class="hv" aria-label="Home">' +
     '<div class="hv-top">' +
      '<div class="hv-logo"><img src="' + IMG.logo + '" alt=""><div>Liberty<b>Quiz</b></div></div>' +
      '<div class="hv-lvl"><img src="' + IMG.logo + '" alt=""><div class="t">Level ' + level() + '<i><em style="width:' + Math.max(4, pct) + '%"></em></i><span style="font-size:11px;font-weight:800">' + tm + ' / 128</span></div></div>' +
-     '<div class="hv-chips"><span class="hv-chip" title="XP">' + HI.starc + S.xp + '</span><span class="hv-chip" title="Moedas">' + HI.coin + (S.coins || 0) + '</span><span class="hv-chip" title="Gemas">' + HI.gem + (S.gems || 0) + '</span></div>' +
-     '<div class="hv-ico">' + ib("soon:Conquistas", HI.trophy, "Conquistas") + ib("cards", HI.cards, "Cards") + ib("me", HI.stats, "Meu progresso") + ib("me", HI.gear, "Configuracoes") + '</div>' +
+     '<div class="hv-chips"><span class="hv-chip" title="XP">' + HI.starc + S.xp + '</span><span class="hv-chip" title="Moedas">' + HI.coin + coins() + '</span><span class="hv-chip" title="Gemas">' + HI.gem + gems() + '</span></div>' +
+     '<div class="hv-ico">' + ib("ach", HI.trophy, "Conquistas", achClaimable()) + ib("cards", HI.cards, "Cards") + ib("me", HI.stats, "Meu progresso") + ib("me", HI.gear, "Configuracoes") + '</div>' +
     '</div>' +
     '<div class="hv-body">' +
      '<div class="hv-libby"><div class="hv-fl">' + M() + '</div></div>' +
@@ -816,11 +970,11 @@ function vHome(){
      '</div>' +
      '<div class="hv-evo"><span class="hv-rib">Evolução da sua Águia</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
      '<div class="hv-skills"><h4>' + HI.starc + 'Novas Habilidades</h4><div class="hv-sk">' +
-       sk("soon:Bônus de XP", HI.bolt, "Bônus de XP", 1) + sk("voice", HI.mic, "Treino de Voz") + sk("soon:Modo Desafio", HI.target, "Modo Desafio", 1) + sk("soon:Contra o Relógio", HI.clock, "Contra o Relógio", 1) + sk("soon:Animações Especiais", HI.wings, "Animações Especiais", 1) +
+       sk("bonus", HI.bolt, bonusOn() ? "Bônus ATIVO" : "Bônus de XP") + sk("voice", HI.mic, "Treino de Voz") + sk("soon:Modo Desafio", HI.target, "Modo Desafio", 1) + sk("soon:Contra o Relógio", HI.clock, "Contra o Relógio", 1) + sk("soon:Animações Especiais", HI.wings, "Animações Especiais", 1) +
      '</div></div>' +
     '</div>' +
     '<nav class="hv-bar" aria-label="Menu">' +
-     bar("learn", HI.map, "Fases") + bar("soon:Missões", HI.mission, "Missões", 1) + bar("soon:Conquistas", HI.medal, "Conquistas", 1) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("soon:Recompensas", HI.chest, "Recompensas", 1) + bar("test", HI.guide, "Guia do Teste") +
+     bar("learn", HI.map, "Fases") + bar("missions", HI.mission, "Missões", 0, misClaimable()) + bar("ach", HI.medal, "Conquistas", 0, achClaimable()) + bar("soon:Ranking", HI.rank, "Ranking", 1) + bar("soon:Recompensas", HI.chest, "Recompensas", 1) + bar("test", HI.guide, "Guia do Teste") +
     '</nav>' +
    '</section>';
 }
@@ -829,6 +983,7 @@ $("view").addEventListener("click", e => {
   const g = b.dataset.hg; sfx.tap();
   if (g.startsWith("soon:")) toast(g.slice(5) + ": em breve!");
   else if (g === "voice") startTest("test");
+  else if (g === "bonus") showBonus();
   else go(g);
 });
 $("view").addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches(".hv-card")){ e.preventDefault(); e.target.click(); } });
@@ -1180,10 +1335,10 @@ function grade(ok){
   if (!R || R.over || R.phase === "sheet" || R.kind === "test") return; R.phase = "sheet"; const q = R.cur;
   const rec = S.q[q.n] || (S.q[q.n] = {c:0,w:0}); R.asked++;
   if (R.kind === "lesson" && !(q.n in R.first)) R.first[q.n] = !!ok;   /* only the FIRST try counts for the 70% rule */
-  const gain = 10 + (ok && R.streak + 1 >= 3 ? 5 : 0);
+  const gain = (10 + (ok && R.streak + 1 >= 3 ? 5 : 0)) * (bonusOn() ? 2 : 1);
   if (ok){ rec.c++; rec.last = "c"; R.correct++; R.streak++; R.best = Math.max(R.best, R.streak); R.xp += gain; R.queue.shift(); }
   else { rec.w++; rec.last = "w"; R.wrong++; R.streak = 0; R.missed.push(q); R.queue.shift(); if ((R.requeue[q.n] || 0) < 2){ R.requeue[q.n] = (R.requeue[q.n] || 0) + 1; R.queue.push(q); } }
-  save(); bar();
+  onAnswer(ok); save(); bar();
   const sh = $("sheet"); sh.className = "sheet " + (ok ? "good" : "bad"); sh.hidden = false; $("foot").hidden = true;
   const good = ["Nice!","Great job!","You got it!","Excellent!","Perfect!"], bad = ["Not quite","Keep going","Study this one","Almost"];
   $("sheetTitle").innerHTML = (ok ? IC.check : IC.cross) + "<span>" + (ok ? good[Math.floor(Math.random()*good.length)] : bad[Math.floor(Math.random()*bad.length)]) + "</span>";
@@ -1378,7 +1533,7 @@ function finish(){
     R.xp = R.mock ? (R.passed ? 20 : 0) : R.correct * 10 + (R.passed ? 30 : 0);
     S.hist.push({d:new Date().toLocaleDateString("en-US",{month:"short",day:"numeric"}), m:R.label, c:R.correct, a:R.asked, p:R.passed}); S.hist = S.hist.slice(-20); if (R.mock) recMock();
   } else { R.bonus = R.wrong === 0 ? 20 : 0; R.xp += R.bonus; }
-  S.xp += R.xp; save(); topbar(); renderResult(true); $("run").hidden = true; $("res").hidden = false; $("res").scrollTop = 0;
+  onFinish(); S.xp += R.xp; save(); topbar(); renderResult(true); $("run").hidden = true; $("res").hidden = false; $("res").scrollTop = 0;
 }
 function renderResult(first){
   if (R.mock) return renderMockResult(first);
@@ -1497,6 +1652,15 @@ function mergeProgress(row){
   Object.keys(cm).forEach(k => { if (!S.mock[k] || (cm[k].d || "") > (S.mock[k].d || "")) S.mock[k] = cm[k]; });
   if (d.mockXp) S.mockXp = true;
   if (d.hatched) S.hatched = true;
+  ensureEco();
+  ["coinsEarned", "coinsSpent", "gemsEarned", "gemsSpent", "bonusUntil"].forEach(k => { S[k] = Math.max(S[k] || 0, +d[k] || 0); });
+  Object.keys(d.ach || {}).forEach(k => { if (!S.ach[k]) S.ach[k] = d.ach[k]; });
+  Object.keys(d.st || {}).forEach(k => { S.st[k] = Math.max(S.st[k] || 0, +d.st[k] || 0); });
+  if (d.mis && d.mis.list){
+    if (!S.mis || d.mis.day > S.mis.day) S.mis = d.mis;
+    else if (d.mis.day === S.mis.day) d.mis.list.forEach(cm => { const m = S.mis.list.find(x => x.id === cm.id); if (m){ m.got = Math.max(m.got, cm.got); m.claimed = m.claimed || cm.claimed; } });
+    if (S.mis && d.mis.day === S.mis.day && d.mis.bonusGiven) S.mis.bonusGiven = true;
+  }
 }
 async function cloudPull(){
   if (!(await ensureSess())) return;
@@ -1511,7 +1675,7 @@ async function cloudPull(){
 function cloudPush(){ if (!SB || !SESS) return; clearTimeout(pushT); pushT = setTimeout(doPush, 2500); }
 async function doPush(){
   if (!(await ensureSess())) { cloudMsg = "Signed out. Sign in again to keep syncing."; return; }
-  const row = {user_id: SESS.user.id, name: S.name || null, state: S.state || null, xp: S.xp, streak: S.days, last_day: S.last || null, played: S.played, passed: S.passed, data: {q: S.q, hist: S.hist, style: S.style, autoRead: S.autoRead, sound: S.sound, mock: S.mock, mockXp: S.mockXp, hatched: S.hatched}};
+  const row = {user_id: SESS.user.id, name: S.name || null, state: S.state || null, xp: S.xp, streak: S.days, last_day: S.last || null, played: S.played, passed: S.passed, data: {q: S.q, hist: S.hist, style: S.style, autoRead: S.autoRead, sound: S.sound, mock: S.mock, mockXp: S.mockXp, hatched: S.hatched, coinsEarned: S.coinsEarned, coinsSpent: S.coinsSpent, gemsEarned: S.gemsEarned, gemsSpent: S.gemsSpent, bonusUntil: S.bonusUntil, ach: S.ach, st: S.st, mis: S.mis}};
   try {
     const r = await sbFetch("/rest/v1/libby_progress?on_conflict=user_id", {method: "POST", headers: {Prefer: "resolution=merge-duplicates,return=minimal"}, body: JSON.stringify(row)});
     cloudMsg = r.ok ? "Saved to your account at " + new Date().toLocaleTimeString() : "Could not save (" + r.status + ")";
