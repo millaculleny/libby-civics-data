@@ -404,6 +404,15 @@ body.onhome #view{padding:10px 10px 12px}
  .hv-chip{font-size:14px}.hv-logo{font-size:18px}.hv-logo img{width:auto;height:38px}
 }
 @media (prefers-reduced-motion:reduce){.hv-fl{animation:none}}
+/* ---------- Adventure card: main action + "View all levels" ---------- */
+.hv-card.adv{cursor:default;padding-bottom:12px}
+.hv-acts{position:relative;z-index:2;display:grid;gap:7px;justify-items:center;width:100%;margin-top:8px}
+.hv-cta{width:min(100%,270px);min-height:46px;border-radius:99px;border:3px solid #fff4c2;background:linear-gradient(#6ee05b,#26a63a);color:#fff;font-weight:900;font-size:16px;line-height:1.1;padding:6px 16px;box-shadow:0 5px 0 rgba(0,0,0,.28),0 8px 14px rgba(0,0,0,.3);cursor:pointer;text-shadow:0 1px 0 #14602a}
+.hv-sec{min-height:44px;border-radius:99px;border:2px solid rgba(255,255,255,.85);background:rgba(6,30,70,.6);color:#fff;font-weight:800;font-size:14px;padding:6px 18px;cursor:pointer}
+.hv-cta:focus-visible,.hv-sec:focus-visible{outline:3px solid #ffd23c;outline-offset:3px}
+.hv-cta:active{transform:translateY(2px)}
+@media (max-width:520px){.hv-card.adv{padding-bottom:10px}.hv-cta{min-height:46px;font-size:15.5px}.hv-sec{min-height:44px}.hv-acts{gap:6px;margin-top:6px}}
+
 /* ---------- home: next-evolution goal, daily mission card, swipe hint ---------- */
 .hv-goal{margin:4px auto 0;max-width:230px;background:rgba(10,30,70,.78);border:2px solid #ffd23c;border-radius:14px;padding:5px 10px;font-weight:900;font-size:13px;line-height:1.25;text-shadow:0 1px 0 #0d2252}
 .hv-goal i{display:block;height:7px;border-radius:7px;background:#0d2252;margin-top:5px;overflow:hidden}
@@ -1090,6 +1099,14 @@ function missionGo(){
   if (m.id === "challenge") return showChallengeInfo();
   if (nid >= 0) startLesson(nid); else startChallenge();
 }
+function advState(){
+  const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length;
+  const nid = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
+  const started = Object.keys(S.done || {}).some(k => S.done[k]) || totalMastered() > 0;
+  return {nid, all: nid < 0, fresh: nid >= 0 && !started};
+}
+function advLabel(a){ return a.all ? "Review levels" : a.fresh ? "Start Level 1" : "Continue to Level " + (a.nid + 1); }
+function advGo(){ const a = advState(); if (a.all){ window._scrolled = 0; go("learn"); } else startLesson(a.nid); }
 function nextLevelInfo(){
   const isDone = L => !!S.done[L.id] || mastered(L) === L.qs.length;
   const id = LESSONS.findIndex(L => !isDone(L) && lessonOpen(L));
@@ -1102,6 +1119,12 @@ function wireStrip(){
   const cur = st.querySelector(".stg.cur");
   if (cur && st.scrollWidth > st.clientWidth + 4) st.scrollLeft = Math.max(0, cur.offsetLeft - (st.clientWidth - cur.offsetWidth) / 2);
   st.addEventListener("scroll", upd, {passive: true}); upd();
+}
+function advButtons(){
+  const a = advState();
+  /* all levels done: the single main action opens the map for review; otherwise main = start/continue, secondary = open the map */
+  if (a.all) return '<div class="hv-acts"><button class="hv-cta" type="button" data-hg="learn">' + advLabel(a) + '</button></div>';
+  return '<div class="hv-acts"><button class="hv-cta" type="button" data-hg="adv-go">' + advLabel(a) + '</button><button class="hv-sec" type="button" data-hg="learn">View all levels</button></div>';
 }
 function vHome(){
   const si = stageIdx(), tm = totalMastered(), pct = Math.round(tm / 128 * 100);
@@ -1123,7 +1146,7 @@ function vHome(){
     '<div class="hv-body">' +
      '<div class="hv-libby' + (S.own && S.own.halo ? ' halo' : '') + '"><div class="hv-fl">' + M() + '</div>' + goalHtml() + '</div>' +
      '<div class="hv-cards">' +
-      '<div class="hv-card adv" role="button" tabindex="0" data-hg="learn">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p><span class="hv-next">' + esc(nextLevelInfo()) + '</span>' + play + '</div>' +
+      '<div class="hv-card adv">' + ART_ADV + '<h3><small>Liberty</small>Adventure</h3><p>Learn level by level and watch Libby grow.</p><span class="hv-next">' + esc(nextLevelInfo()) + '</span>' + advButtons() + '</div>' +
       '<div class="hv-card chal" role="button" tabindex="0" data-hg="test">' + ART_CHAL + '<h3><small>Citizenship</small>Challenge</h3><p>Practice for the U.S. citizenship interview.</p>' + play + '</div>' +
      '</div>' +
      '<div class="hv-evo"><span class="hv-rib">Your Eagle Evolution</span><div class="stages hm-stg" aria-label="Libby\'s stages">' + strip + '</div><div class="hv-prog">' + esc(nxt) + '</div></div>' +
@@ -1145,6 +1168,7 @@ $("view").addEventListener("click", e => {
   else if (g === "mis-go") missionGo();
   else if (g === "mis-claim"){ const M = ensureMis(), r = M.list.filter(m => !m.claimed && m.got >= MIS_POOL.find(x => x.id === m.id).need)[0]; if (r) claimMis(r.id); }
   else if (g === "learn"){ window._scrolled = 0; go("learn"); }
+  else if (g === "adv-go") advGo();
   else if (g === "bonus") showBonus();
   else if (g === "challenge") showChallengeInfo();
   else go(g);
