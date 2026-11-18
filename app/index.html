@@ -277,6 +277,13 @@ footer.fine a{color:inherit}
 .stg.past .sc{border-color:var(--gold)}
 .stg.cur{color:var(--gold-d)}
 .stg.cur .sc{border-color:var(--gold);background:#fff4d6;box-shadow:0 0 0 4px rgba(230,169,43,.25)}
+/* ---------- evolution videos ---------- */
+#evo .evclip{position:relative;width:min(94vw,760px);aspect-ratio:16/9;border-radius:18px;overflow:hidden;border:3px solid #ffd23c;box-shadow:0 14px 40px rgba(0,0,0,.55);background:#0b2a54}
+#evo .evclip video{width:100%;height:100%;object-fit:cover;display:block}
+#evo .evskip{position:absolute;top:10px;right:10px;z-index:2;border:2px solid #fff4c2;background:rgba(7,30,67,.82);color:#fff;border-radius:99px;padding:8px 18px;font-weight:900;font-size:15px;cursor:pointer}
+#evo .evskip:focus-visible,#evo #evOk:focus-visible{outline:3px solid #ffd23c;outline-offset:3px}
+.evsr{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+
 .hint50{margin-top:6px;border:2px dashed var(--gold-d);background:var(--card);color:var(--gold-d);border-radius:14px;padding:9px 14px;font-weight:900;cursor:pointer}
 .hint50[disabled]{opacity:.6;cursor:default}
 .opt.gone{opacity:.28;text-decoration:line-through}
@@ -2041,6 +2048,30 @@ function evoSparks(box, mode){
     box.appendChild(s); setTimeout(() => s.remove(), 2400);
   }
 }
+/* ---------- evolution videos: one clip per stage change, played once, inline and muted ---------- */
+let EVO_DIR = "evo/";
+const EVO_CLIPS = {2: "01-baby-para-kid.mp4", 3: "02-kid-para-teen.mp4", 4: "03-teen-para-adult.mp4", 5: "04-adult-para-flag.mp4"};
+/* resolves true when the clip ended or was skipped, false when it could not play (then the art is shown directly) */
+function playEvoClip(el, k){
+  return new Promise(res => {
+    const file = EVO_CLIPS[k]; if (!file) return res(false);
+    const from = STAGE_DEF[k - 1][1], to = STAGE_DEF[k][1];
+    el.setAttribute("aria-label", "Libby is evolving from " + from + " to " + to);
+    el.innerHTML = '<div class="evclip"><video muted playsinline preload="auto" aria-hidden="true"></video><button class="evskip" id="evSkip" type="button" aria-label="Skip the evolution animation">Skip</button></div><div class="evsr" role="status" aria-live="polite">Libby is evolving from ' + esc(from) + ' to ' + esc(to) + '. The animation has no sound. Press Skip to go straight to the result.</div>';
+    const v = el.querySelector("video"), skip = $("evSkip"); let done = false, startT = 0, endT = 0;
+    const finish = ok => { if (done) return; done = true; clearTimeout(startT); clearTimeout(endT); document.removeEventListener("keydown", onKey); try { v.pause(); v.removeAttribute("src"); v.load(); } catch(e){} res(ok); };
+    const onKey = e => { if (e.key === "Escape") finish(true); };
+    document.addEventListener("keydown", onKey);
+    skip.onclick = () => finish(true); skip.focus();
+    v.muted = true; v.defaultMuted = true;
+    v.addEventListener("error", () => finish(false));
+    v.addEventListener("ended", () => finish(true));
+    v.addEventListener("playing", () => { clearTimeout(startT); endT = setTimeout(() => finish(true), ((v.duration || 6) + 3) * 1000); });
+    startT = setTimeout(() => finish(false), 6000);   /* never started: show the art directly */
+    v.src = EVO_DIR + file;
+    const p = v.play(); if (p && p.catch) p.catch(() => finish(false));
+  });
+}
 async function playEvolution(from, to){
   EVO_BUSY = true;
   const el = document.createElement("div"); el.id = "evo"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Libby is evolving");
@@ -2049,6 +2080,19 @@ async function playEvolution(from, to){
   for (let k = from + 1; k <= to; k++){
     const old = STAGE_DEF[k - 1], nw = STAGE_DEF[k], last = k === to;
     el.classList.remove("glow");
+    if (EVO_CLIPS[k]){
+      /* video stage: clip first (unless reduced motion), then the art and the final message, then Continue */
+      let played = false;
+      if (!fast) played = await playEvoClip(el, k);
+      const msgH = k === 5 ? "Libby is a Citizen!" : "Libby evolved!", msgP = k === 5 ? "You learned it all. Now go ace the real test!" : "She is now a " + nw[1] + ". Keep learning to see her grow again.";
+      el.setAttribute("aria-label", msgH);
+      el.classList.add("glow");
+      el.innerHTML = '<div class="rays"></div><h2 id="evH">' + msgH + '</h2><div class="evstage"><img class="new' + (fast ? "" : " show") + '" src="' + IMG[nw[0]] + '" alt="' + esc(nw[1]) + '"></div><div class="evchips"><span><img src="' + IMG[old[0]] + '" alt="">' + old[2] + '</span><b>&rarr;</b><span class="n"><img src="' + IMG[nw[0]] + '" alt="">' + nw[2] + '</span></div><p class="evp" id="evP">' + esc(msgP) + '</p><button class="btn gline" id="evOk" type="button" style="max-width:320px">' + (last ? "Awesome!" : "Next") + '</button><div class="evsr" role="status" aria-live="assertive">' + esc(msgH + " " + msgP) + '</div>';
+      sfx.win(); if (!fast){ confetti(); }
+      const ok2 = $("evOk"); ok2.focus();
+      await new Promise(res => { ok2.onclick = res; });
+      continue;
+    }
     el.innerHTML = '<div class="rays"></div><h2 id="evH">Something is happening...</h2><div class="evstage" id="evS"><img class="old" src="' + IMG[old[0]] + '" alt=""><img class="new" src="' + IMG[nw[0]] + '" alt="" hidden><div class="flashw"></div></div><div class="evchips" id="evC" style="visibility:hidden"><span><img src="' + IMG[old[0]] + '" alt="">' + old[2] + '</span><b>&rarr;</b><span class="n"><img src="' + IMG[nw[0]] + '" alt="">' + nw[2] + '</span></div><p class="evp" id="evP"></p><button class="btn gline" id="evOk" type="button" style="visibility:hidden;max-width:320px">' + (last ? "Awesome!" : "Next") + '</button>';
     const S_ = $("evS"), oldI = S_.querySelector(".old"), newI = S_.querySelector(".new"), fl = S_.querySelector(".flashw");
     el.classList.add("glow");
@@ -2081,6 +2125,8 @@ function checkEvolve(){
 
 $("logoImg").src = IMG.logo; if (SB){ loginGate("in"); } else { nav(); render(); if (!S.onboarded) onboarding(); else { S.hatched = true; intro(); } }
 refreshOfficials();
+/* preview helper: index.html?evo=1-2 plays the evolution scene for stages 1 to 2 (use evo=1-4 for a multi-stage jump) */
+(() => { const m = /[?&]evo=(\d)-(\d)/.exec(location.search); if (m && +m[2] > +m[1] && +m[2] <= 5) setTimeout(() => { if (!EVO_BUSY) playEvolution(+m[1], +m[2]); }, 700); })();
 document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible") refreshOfficials(); });
 setInterval(refreshOfficials, 3600e3);
 </script>
