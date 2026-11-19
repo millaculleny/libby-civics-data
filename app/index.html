@@ -642,18 +642,31 @@ input[type=text],input[type=search],input[type=password],select,textarea{border:
 .full .big.vid{width:min(86vw,380px);height:min(86vw,380px)}
 .hatchvid{width:100%;height:100%;border-radius:30px;overflow:hidden;background:#fff;box-shadow:0 10px 34px rgba(21,33,90,.2)}
 .hatchvid video{width:100%;height:100%;object-fit:cover;display:block}
-.mkgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.mkt{position:relative;border-radius:20px;background:#233580;color:#fff;padding:22px 10px 16px;display:flex;flex-direction:column;align-items:center;gap:12px;font-weight:800;font-size:17px;box-shadow:0 8px 18px rgba(35,53,128,.28);border-bottom:6px solid #16225a;min-height:150px;justify-content:center;text-align:center}
-.mkt:active{transform:translateY(3px);border-bottom-width:3px}
-.mkt svg{width:54px;height:54px}
-.mkt small{font-size:13px;font-weight:800;opacity:.85;margin-top:-6px}
-.mkt .ck{position:absolute;right:-8px;top:-10px;width:36px;height:36px;border-radius:50%;background:#d4a437;display:grid;place-items:center;border:3px solid var(--bg)}
-.mkt .ck svg{width:20px;height:20px}
-.mkt .ck.try{background:#8a93b8}
-.mkres{width:100%;border-radius:18px;padding:16px;font-weight:900;font-size:19px;display:flex;align-items:center;justify-content:center;gap:10px;background:#e4e4e6;color:#8a8a90}
-.mkres.open{background:#d4a437;color:#fff;border-bottom:5px solid #a67c1c}
-.mkres svg{width:24px;height:24px}
-.mknote{text-align:center;color:var(--mute);font-size:14px;margin:8px 0 18px}
+.challenge-hero{display:grid;align-content:center;min-height:190px;margin:6px 0 20px;padding:24px;border-radius:24px;color:#fff;background:#142552 linear-gradient(90deg,#101c47e8 0%,#13255391 54%,transparent 100%);background-image:linear-gradient(90deg,#101c47f0 0%,#132553a3 48%,transparent 100%),url("assets/challenge-capitol.webp");background-position:center,right center;background-size:cover;box-shadow:0 8px 20px #0b14332e}
+.challenge-hero h2{max-width:8em;margin:0;font-size:clamp(27px,7vw,42px);line-height:1.05;font-weight:900}
+.challenge-hero p{margin:10px 0 8px;font-size:14px;font-weight:800;color:#fff}
+.challenge-progress{display:flex;gap:5px;width:min(100%,136px)}
+.challenge-progress i{flex:1;height:5px;border-radius:5px;background:#ffffff58}
+.challenge-progress .passed{background:#f8cd68}
+.challenge h3{margin:0 0 10px;color:var(--ink);font-size:18px}
+.mkgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.challenge .mkt{min-width:0;min-height:127px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;text-align:left;padding:13px;border:1px solid var(--line);border-bottom-width:4px;border-radius:18px;background:var(--card);color:var(--ink);font-weight:900;box-shadow:none;opacity:1}
+.challenge .mkt:active:not(:disabled){transform:translateY(2px)}
+.challenge .mkt:focus-visible,.challenge .mkres:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.challenge .mkt.next{background:linear-gradient(135deg,#304baa,#223477);color:#fff;border-color:#526cce;border-bottom-color:#162759}
+.challenge .mkt.lock{background:var(--soft);color:var(--ink);cursor:default}
+.challenge .mkt small{font-size:12px;line-height:1.35;font-weight:700;color:var(--mute)}
+.challenge .mkt.next small{color:#e2e9ff}
+.challenge .mkt strong{font-size:clamp(13px,3.7vw,17px);line-height:1.14}
+.challenge-icon{width:35px;height:35px;display:grid;place-items:center;border-radius:11px;background:var(--soft);color:var(--ink)}
+.challenge-icon svg{width:22px;height:22px}
+.mkt.next .challenge-icon{background:#ffffff24;color:#fff}
+.mkt.lock .challenge-icon{background:var(--card);color:var(--mute)}
+.mkt.passed .challenge-icon{background:#d8f6e1;color:#1d6036}
+.challenge .mkres{width:100%;min-height:48px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-weight:900;opacity:1}
+.challenge .mkres.open{background:#f4cc66;color:#31230e;border-color:#d5a537}
+.challenge .mkres svg{width:19px;height:19px}
+.challenge .mknote{text-align:center;color:var(--mute);font-size:13px;margin:8px 0 18px}
 .mkh{display:flex;align-items:center;gap:10px;font-size:30px;font-weight:900;color:#14284b;margin:4px 0}
 :root[data-theme="dark"] .mkh{color:#e9eefb}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mkh{color:#e9eefb}}
@@ -1843,11 +1856,27 @@ function recMock(){
 function mkOpen(k){ const i = MK_KEYS.indexOf(k); return i === 0 || !!(S.mock[MK_KEYS[i - 1]] && S.mock[MK_KEYS[i - 1]].p); }
 function chooseBlock(){
   const done = MK_KEYS.every(k => S.mock[k]);
-  const tiles = MK_KEYS.map(k => { const m = S.mock[k], lk = !mkOpen(k);
-    return '<button class="mkt' + (lk ? " lock" : "") + '" data-mk="' + k + '" type="button"' + (lk ? " disabled" : "") + '>' + (m ? '<span class="ck' + (m.p ? "" : " try") + '">' + CK_SVG + '</span>' : "") + (lk ? LOCK_SVG : MK_ICON[k]) + '<span>' + MK[k].name + '</span>' + (m ? '<small>' + m.pct + '%' + (m.p ? "" : " - try again") + '</small>' : lk ? '<small>Pass ' + MK[MK_KEYS[MK_KEYS.indexOf(k) - 1]].name + ' first</small>' : "") + '</button>'; }).join("");
-  return '<h2 class="sec">Choose your test</h2><div class="mkgrid">' + tiles + '</div>' +
-   '<button class="mkres' + (done ? " open" : "") + '" data-mkres type="button"' + (done ? "" : " disabled") + '>' + (done ? "" : LOCK_SVG) + 'Results</button>' +
-   '<p class="mknote">' + (done ? "All 4 tests done. Tap Results to see how you did." : "Complete all 4 tests to unlock your result.") + '</p>';
+  const passed = MK_KEYS.filter(k => S.mock[k]?.p).length;
+  const next = MK_KEYS.find(k => mkOpen(k) && !S.mock[k]?.p);
+  const progress = Array.from({length: MK_KEYS.length}, (_, i) => i < passed ? '<i class="passed"></i>' : '<i></i>').join("");
+  const tiles = MK_KEYS.map((key, index) => {
+    const result = S.mock[key], locked = !mkOpen(key), active = key === next;
+    const state = locked ? " lock" : result?.p ? " passed" : active ? " next" : "";
+    const detail = locked ? "Pass " + MK[MK_KEYS[index - 1]].name + " first"
+      : result?.p ? "Passed \u00b7 " + result.pct + "%"
+      : result ? result.pct + "% \u00b7 Try again" : active ? "Start here" : "";
+    const icon = locked ? LOCK_SVG : result?.p ? CK_SVG : MK_ICON[key];
+    return '<button class="mkt' + state + '" data-mk="' + key + '" type="button"' + (locked ? " disabled" : "") + '>' +
+      '<span class="challenge-icon" aria-hidden="true">' + icon + '</span><strong>' + MK[key].name + '</strong>' +
+      (detail ? '<small>' + detail + '</small>' : "") + '</button>';
+  }).join("");
+  return '<section class="challenge" aria-labelledby="challenge-title"><header class="challenge-hero">' +
+    '<h2 id="challenge-title">Citizenship Challenge</h2><p>' + passed + ' of ' + MK_KEYS.length + ' tests passed</p>' +
+    '<div class="challenge-progress" aria-hidden="true">' + progress + '</div></header>' +
+    '<h3>Choose your test</h3><div class="mkgrid">' + tiles + '</div>' +
+    '<button class="mkres' + (done ? " open" : "") + '" data-mkres type="button"' + (done ? "" : " disabled") + '>' +
+    (done ? "" : LOCK_SVG) + 'Results</button>' +
+    '<p class="mknote">' + (done ? "All 4 tests done. Tap Results to see how you did." : "Complete all 4 tests to unlock your result.") + '</p></section>';
 }
 function mkReview(){
   const w = R.mock === "writing" ? "wrote" : "said";
