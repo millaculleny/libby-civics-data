@@ -75,6 +75,59 @@ svg{display:block}
 @keyframes bob{50%{transform:translateY(-6px)}}
 .hop{animation:hop .7s cubic-bezier(.3,.7,.3,1)}
 @keyframes hop{0%{transform:translateY(0) scale(1)}22%{transform:translateY(2px) scale(1.05,.93)}55%{transform:translateY(-20px) scale(.97,1.05)}82%{transform:translateY(0) scale(1.03,.97)}100%{transform:translateY(0) scale(1)}}
+#runMascotBox{position:relative;isolation:isolate}
+#runMascotBox.libby-baby,#runMascotBox.libby-adult{animation:none}
+.libby-baby>img,.libby-adult>img{position:relative;z-index:1}
+  .libby-baby > img { animation: libby-baby 1.05s cubic-bezier(.3,.6,.35,1); }
+  @keyframes libby-baby {
+    12% { transform: translateY(5px) scale(1.15,.83) rotate(-7deg); }
+    39% { transform: translateY(-32px) scale(1.12) rotate(-24deg); }
+    55% { transform: translateY(-19px) scale(1.13) rotate(17deg); }
+    68% { transform: translateY(5px) scale(1.2,.8) rotate(3deg); }
+    82% { transform: translateY(-13px) rotate(-8deg); }
+  }
+  .libby-adult > img { animation: libby-adult 1.1s cubic-bezier(.2,.75,.3,1); }
+  @keyframes libby-adult {
+    14% { transform: translateY(4px) scale(.94) rotate(9deg); }
+    43%, 64% { transform: translateY(-17px) scale(1.21) rotate(-12deg); filter: drop-shadow(0 0 9px #ba680a); }
+    85% { transform: translateY(2px) rotate(4deg); }
+  }
+  .libby-burst { display: none; position: absolute; inset: 0; pointer-events: none; }
+  .libby-baby > .libby-burst, .libby-adult > .libby-burst { display: block; }
+  .libby-burst span {
+    position: absolute; left: 50%; top: 48%; opacity: 0;
+    color: var(--color); font-size: 1rem;
+    line-height: 1; text-shadow: 0 1px 2px #4a2e2550;
+    animation: libby-scatter .85s .19s ease-out both;
+  }
+  .libby-adult > .libby-burst span { animation-delay: .27s; }
+  .libby-burst span:nth-child(1) { --x: -210%; --y: -133%; --color: #a12782; }
+  .libby-burst span:nth-child(2) { --x: -140%; --y: 72%; --color: #0a789e; }
+  .libby-burst span:nth-child(3) { --x: 140%; --y: -155%; --color: #9a490c; }
+  .libby-burst span:nth-child(4) { --x: 165%; --y: 32%; --color: #b83753; }
+  .libby-burst span:nth-child(5) { --x: -50%; --y: -210%; --color: #637522; }
+  @keyframes libby-scatter {
+    0% { opacity: 0; transform: translate(-50%,-50%) scale(.4); }
+    28%, 56% { opacity: 1; }
+    64% { transform: translate(var(--x),var(--y)) rotate(35deg) scale(1.08); }
+    100% { opacity: 0; transform: translate(var(--x),calc(var(--y) + 55%)) rotate(65deg) scale(.65); }
+  }
+  .libby-adult > .libby-burst::before {
+    content: ""; position: absolute; inset: 19% 9%;
+    border: 4px solid #b96d12; border-left-color: transparent; border-bottom-color: transparent;
+    border-radius: 50%; opacity: 0; animation: libby-arc .82s .2s ease-out both;
+  }
+  @keyframes libby-arc {
+    0% { transform: rotate(-95deg) scale(.66); opacity: 0; }
+    33%, 60% { opacity: 1; }
+    100% { transform: rotate(38deg) scale(1.06); opacity: 0; }
+  }
+  @keyframes libby-glow { 50% { filter: drop-shadow(0 0 9px #a66518); } }
+  @media (prefers-reduced-motion: reduce) {
+    .libby-baby > img, .libby-adult > img { animation: libby-glow .65s ease-in-out; }
+    .libby-baby > .libby-burst, .libby-adult > .libby-burst { display: none; }
+  }
+
 .wiggle{animation:wiggle .5s ease}
 @keyframes wiggle{20%{transform:rotate(-8deg)}50%{transform:rotate(7deg)}80%{transform:rotate(-3deg)}}
 
@@ -736,7 +789,27 @@ function stageIdx(){
 }
 const mascotImg = (key, cls) => '<img class="mascot ' + (cls || "") + '" src="' + IMG[key] + '" alt="" draggable="false">';
 const M = () => mascotImg(STAGE_DEF[stageIdx()][0]);
-function mood(box, m){ if (!box) return; box.classList.remove("hop", "wiggle"); void box.offsetWidth; if (m === "happy") box.classList.add("hop"); if (m === "sad") box.classList.add("wiggle"); }
+function mood(box, m){
+  if (!box) return;
+  box.classList.remove("hop", "wiggle", "libby-baby", "libby-adult");
+  box.querySelector(".libby-burst")?.remove();
+  void box.offsetWidth;
+  if (m === "sad"){ box.classList.add("wiggle"); return; }
+  if (m !== "happy") return;
+  const stage = box.id === "runMascotBox" ? STAGE_DEF[stageIdx()][0] : null;
+  if (stage !== "baby" && stage !== "adult"){ box.classList.add("hop"); return; }
+  const burst = document.createElement("span");
+  burst.className = "libby-burst";
+  burst.setAttribute("aria-hidden", "true");
+  const sparks = stage === "baby" ? "★✦★✧★" : "✦✧✦✧✦";
+  for (const spark of sparks){
+    const particle = document.createElement("span");
+    particle.textContent = spark;
+    burst.appendChild(particle);
+  }
+  box.appendChild(burst);
+  box.classList.add("libby-" + stage);
+}
 function toast(msg){ let t = $("toast"); if (!t){ t = document.createElement("div"); t.id = "toast"; t.setAttribute("role", "status"); document.body.appendChild(t); } t.textContent = msg; t.classList.add("on"); clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 2200); }
 
 
