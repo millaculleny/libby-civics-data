@@ -643,34 +643,34 @@ input[type=text],input[type=search],input[type=password],select,textarea{border:
 .hatchvid{width:100%;height:100%;border-radius:30px;overflow:hidden;background:#fff;box-shadow:0 10px 34px rgba(21,33,90,.2)}
 .hatchvid video{width:100%;height:100%;object-fit:cover;display:block}
 .challenge{margin:0 0 24px}
-.challenge-hero{position:relative;min-height:clamp(255px,64vw,330px);margin:0 0 20px;padding:24px;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-end;overflow:hidden;border-radius:26px;background:#121e42 url("assets/challenge-capitol.webp") 73% center/cover;color:#fff;isolation:isolate;box-shadow:0 10px 24px #080f302e}
-.challenge-hero::before{content:"";position:absolute;inset:0;z-index:-1;background:linear-gradient(0deg,#080f2a 0%,#101b42d9 25%,transparent 77%),linear-gradient(90deg,#0c153b93,transparent 75%)}
-.challenge-hero h2{max-width:9em;margin:0;font-size:clamp(32px,8.6vw,48px);line-height:.99;font-weight:900;letter-spacing:-.04em;text-shadow:0 3px 12px #080f2a}
-.challenge-hero p{margin:13px 0 8px;color:#f1e8d7;font-size:13px;font-weight:800}
-.challenge-progress{display:flex;gap:6px;width:min(100%,156px)}
-.challenge-progress i{flex:1;height:5px;border-radius:5px;background:#ffffff66}
-.challenge-progress .passed{background:#f8cd68}
-.challenge-trail{display:grid;gap:10px;margin:0;padding:0;list-style:none;position:relative;isolation:isolate}
-.challenge-trail::before{content:"";position:absolute;top:30px;bottom:30px;left:24px;width:3px;border-radius:4px;background:linear-gradient(#f0bb55,var(--line) 76%);z-index:-1}
-.challenge-trail li{min-width:0}
-.challenge .mkt{width:100%;display:grid;grid-template-columns:48px minmax(0,1fr) 18px;align-items:center;gap:10px;padding:0;border:0;background:transparent;color:var(--ink);text-align:left;opacity:1;box-shadow:none;font:inherit;cursor:pointer}
-.challenge .mkt:disabled{cursor:default}
-.challenge .mkt:focus-visible,.challenge .mkres:focus-visible{outline:3px solid var(--blue);outline-offset:3px;border-radius:16px}
-.challenge-icon{display:grid;place-items:center;width:48px;height:48px;border:3px solid var(--bg);border-radius:50%;background:var(--soft);color:var(--ink);box-shadow:0 0 0 1px var(--line)}
-.challenge-icon svg{width:22px;height:22px}
-.challenge-stage{position:relative;display:flex;flex-direction:column;justify-content:center;gap:4px;min-height:65px;margin-right:-28px;padding:10px 36px 10px 12px;background:var(--card);border:1px solid var(--line);border-radius:15px}
-.challenge-stage strong{font-size:clamp(14px,3.8vw,17px);line-height:1.16;font-weight:900}
-.challenge-stage small{font-size:12px;line-height:1.3;font-weight:750;color:var(--mute)}
-.challenge-arrow{position:relative;display:block;font-size:21px;line-height:1;font-weight:900;text-align:center;pointer-events:none}
-.challenge .mkt.next .challenge-icon{background:#ffd676;color:#30200e;box-shadow:0 0 0 1px #f2b344,0 3px 12px #f2b34466}
-.challenge .mkt.next .challenge-stage{background:linear-gradient(112deg,#253e85,#172759);border-color:#e3ad50;color:#fff}
-.challenge .mkt.next .challenge-stage small,.challenge .mkt.next .challenge-arrow{color:#ffe0a0}
-.challenge .mkt.passed .challenge-icon{background:#174e39;color:#b9fba1}
-.challenge .mkt.lock .challenge-stage{background:var(--soft)}
-.challenge .mkres{width:100%;min-height:48px;margin-top:15px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font-weight:900;opacity:1}
+.challenge-head{margin:2px 0 12px}
+.challenge-head h2{margin:0;font-size:clamp(25px,7vw,35px);line-height:1.03;letter-spacing:-.035em}
+.challenge-head p{margin:6px 0 0;font-size:13px;font-weight:800;color:var(--mute)}
+.challenge-map{position:relative;isolation:isolate;aspect-ratio:2/3;min-height:475px;max-height:740px;margin:0;border-radius:23px;background:#648343 url("assets/challenge-map.webp") center/100% 100% no-repeat;box-shadow:0 12px 24px #101c3d42;list-style:none;padding:0}
+.challenge-stop{position:absolute;left:var(--map-x);top:var(--map-y);transform:translate(-50%,-50%);z-index:1}
+.challenge-stop.current{z-index:2}
+.challenge-pin{display:grid;justify-items:center;gap:3px;padding:0;min-width:54px;border:0;background:transparent;color:#fff;cursor:pointer;font:inherit}
+.challenge-pin:focus-visible{outline:3px solid #fff;outline-offset:5px;border-radius:12px}
+.challenge-medal{display:grid;place-items:center;width:48px;height:48px;border:2px solid #edf0ff;border-bottom-width:4px;border-radius:50%;background:#263a5b;color:#fff;box-shadow:0 4px 9px #182c4270;transition:transform .16s ease}
+.challenge-medal svg{width:22px;height:22px}
+.challenge-pin:active .challenge-medal{transform:scale(.91)}
+.challenge-pin[aria-current] .challenge-medal{color:#36230d;background:linear-gradient(#ffe794,#ecad3a);outline:2px solid #fff4b9;outline-offset:3px}
+.challenge-pin.passed .challenge-medal{background:#14543d;color:#d7ffbf}
+.challenge-map-label{display:block;max-width:100%;white-space:nowrap;border-radius:10px;background:#102043;color:#fff;padding:3px 7px;font-size:clamp(10px,3.4vw,13px);line-height:1.25;font-weight:900;box-shadow:0 2px 5px #15274668}
+.challenge-mascot{position:absolute;z-index:3;pointer-events:none;width:clamp(56px,18vw,85px);transform:translate(-50%,calc(-100% - 17px));filter:drop-shadow(0 5px 5px #19202a88)}
+.challenge-mascot img{width:100%;height:auto;display:block;animation:bob 2.6s ease-in-out infinite}
+.challenge-bottom{margin-top:13px}
+.challenge .mkres{width:100%;min-height:47px;border-radius:15px;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid var(--line);background:var(--soft);color:var(--ink);font:inherit;font-weight:900}
 .challenge .mkres.open{background:#f4cc66;color:#31230e;border-color:#d5a537}
-.challenge .mkres svg{width:19px;height:19px}
+.challenge .mkres svg{width:18px;height:18px}
 .challenge .mknote{text-align:center;color:var(--mute);font-size:13px;margin:8px 0 0}
+.challenge-details{width:min(420px,calc(100% - 28px));max-height:calc(100% - 28px);padding:22px;border:1px solid var(--line);border-radius:23px;background:var(--card);color:var(--ink);box-shadow:0 12px 36px #080e29a0}
+.challenge-details::backdrop{background:#0a1233a8}
+.challenge-details h3{margin:0 0 10px;font-size:23px}
+.challenge-details p{margin:0 0 13px;line-height:1.4;color:var(--mute)}
+.challenge-details form{margin:12px 0 0}
+.challenge-details .btn{width:100%;min-height:44px}
+@media(prefers-reduced-motion:reduce){.challenge-mascot img{animation:none}.challenge-medal{transition:none}}
 .mkh{display:flex;align-items:center;gap:10px;font-size:30px;font-weight:900;color:#14284b;margin:4px 0}
 :root[data-theme="dark"] .mkh{color:#e9eefb}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .mkh{color:#e9eefb}}
@@ -1352,6 +1352,12 @@ function vTest(){
    '<div class="card" style="display:grid;gap:12px;margin-top:14px"><div><b style="font-size:19px;font-weight:900">Practice my mistakes</b><p style="color:var(--mute);margin-top:4px">' + (w ? w + " question" + (w>1?"s":"") + " you missed last time, as a multiple-choice lesson." : "Questions you miss will show up here.") + '</p></div><button class="btn ghost" data-t="review" type="button"' + (w ? "" : " disabled") + '>Review mistakes</button></div>' +
    '<div class="card" style="margin-top:14px"><b style="font-size:19px;font-weight:900">How the interview day works</b><ol class="steps"><li><span><b>Oath.</b> You swear to tell the truth.</span></li><li><span><b>English speaking.</b> The officer reviews your N-400 application with you: name, address, travel, family and yes or no questions.</span></li><li><span><b>Reading.</b> You see up to 3 sentences and read one out loud.</span></li><li><span><b>Writing.</b> The officer dictates up to 3 sentences and you write one correctly.</span></li><li><span><b>Civics.</b> 20 questions out loud. 12 correct to pass. The officer stops when you reach 12 correct or 9 wrong.</span></li><li><span><b>Decision.</b> You receive a paper saying whether you passed.</span></li></ol><p style="color:var(--mute);font-size:13px;margin-top:10px">General overview. Your interview can vary, so read your appointment notice.</p></div>' +
    '<h2 class="sec" style="margin-top:22px">Recent results</h2><div class="hist">' + (rows || '<p style="color:var(--mute)">No tests yet. Your results will appear here.</p>') + '</div>';
+  const from = challengeWalkFrom;
+  challengeWalkFrom = null;
+  if (from != null){
+    const map = document.querySelector(".challenge-map");
+    requestAnimationFrame(() => { if (map?.isConnected) walkChallengeMascot(map, from, challengeNextStop()); });
+  }
 }
 document.addEventListener("click", e => { const b = e.target.closest("[data-t]"); if (b && !b.disabled){ sfx.tap(); startTest(b.dataset.t); } });
 
@@ -1854,36 +1860,88 @@ function mkAsk(q){
   if (m === "reading") $("micHint").textContent = ASR.supported() ? "Tap the microphone and read the sentence out loud" : "Speech recognition is not available here. Type the sentence.";
 }
 function recMock(){
+  const previous = challengeNextStop();
   const n = R.asked || 1; S.mock[R.mock] = {c:R.correct, a:R.asked, p:R.passed, pct:Math.round(R.correct / n * 100), best:R.best || 0, d:dayStr(new Date())};
+  if (challengeNextStop() > previous) challengeWalkFrom ??= previous;
   if (!S.mockXp && MK_KEYS.every(k => S.mock[k])){ S.mockXp = true; S.xp += 50; R.finalXp = 50; }
 }
 function mkOpen(k){ const i = MK_KEYS.indexOf(k); return i === 0 || !!(S.mock[MK_KEYS[i - 1]] && S.mock[MK_KEYS[i - 1]].p); }
+const CHALLENGE_STOPS = [[50,77],[25,59],[68,42],[40,26],[56,19]];
+const CHALLENGE_PATHS = [
+  [[35,72],[25,69],[21,65]],
+  [[33,55],[51,51],[64,47]],
+  [[52,38],[39,36],[31,33],[31,30]],
+  [[48,24],[54,22]]
+];
+const challengeNextStop = () => {
+  const index = MK_KEYS.findIndex(key => mkOpen(key) && !S.mock[key]?.p);
+  return index < 0 ? MK_KEYS.length : index;
+};
+function walkChallengeMascot(map, from, to){
+  const walker = map?.querySelector(".challenge-mascot");
+  if (!walker || from == null || from >= to || !walker.animate || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const points = [CHALLENGE_STOPS[from]];
+  for (let i = from; i < to; i++) points.push(...CHALLENGE_PATHS[i], CHALLENGE_STOPS[i + 1]);
+  let distance = 0;
+  const offsets = points.map(([x,y], i) => {
+    if (i) distance += Math.hypot((x - points[i-1][0]) * map.clientWidth, (y - points[i-1][1]) * map.clientHeight);
+    return distance;
+  });
+  if (!distance) return;
+  const duration = Math.min(4600, Math.max(950, distance / 9));
+  const step = walker.firstElementChild.animate([
+    {transform:"translateY(0) rotate(-4deg)"}, {transform:"translateY(-4px) rotate(3deg)"}, {transform:"translateY(0) rotate(-4deg)"}
+  ], {duration:260, iterations:Math.ceil(duration/260)});
+  const walk = walker.animate(points.map(([x,y], i) => ({
+    left:x+"%", top:y+"%", offset:offsets[i]/distance
+  })), {duration, fill:"backwards"});
+  walk.onfinish = () => step.cancel();
+}
+let challengeWalkFrom = null;
 function chooseBlock(){
   const resultsReady = MK_KEYS.every(key => S.mock[key]);
   const passed = MK_KEYS.filter(key => S.mock[key]?.p).length;
-  const next = MK_KEYS.find(key => mkOpen(key) && !S.mock[key]?.p);
-  const progress = MK_KEYS.map((_, i) => i < passed ? '<i class="passed"></i>' : '<i></i>').join("");
+  const next = challengeNextStop();
+  const [x, y] = CHALLENGE_STOPS[next];
+  const mascot = '<li class="challenge-mascot" aria-hidden="true" style="left:' + x + '%;top:' + y +
+    '%"><img src="assets/libby-graduation.webp" alt="" draggable="false"></li>';
+  const labels = ["Speaking", "Reading", "Writing", "Civics"];
   const stages = MK_KEYS.map((key, i) => {
-    const result = S.mock[key], locked = !mkOpen(key), current = key === next;
-    const state = locked ? " lock" : result?.p ? " passed" : current ? " next" : "";
-    const detail = locked ? "Pass " + MK[MK_KEYS[i - 1]].name + " first"
-      : result?.p ? "Passed \u00b7 " + result.pct + "%"
-      : result ? result.pct + "% \u00b7 Try again" : current ? "Start test" : "";
+    const result = S.mock[key], locked = !mkOpen(key), current = i === next;
     const icon = locked ? LOCK_SVG : result?.p ? CK_SVG : MK_ICON[key];
-    return '<li><button class="mkt' + state + '" data-mk="' + key + '" type="button"' +
-      (locked ? " disabled" : current ? ' aria-current="step"' : "") + '>' +
-      '<span class="challenge-icon" aria-hidden="true">' + icon + '</span>' +
-      '<span class="challenge-stage"><strong>' + MK[key].name + '</strong>' +
-      (detail ? '<small>' + detail + '</small>' : "") + '</span>' +
-      (locked ? "" : '<span class="challenge-arrow" aria-hidden="true">&#8250;</span>') + '</button></li>';
+    return '<li class="challenge-stop' + (current ? ' current' : '') + '" style="--map-x:' + CHALLENGE_STOPS[i][0] +
+      '%;--map-y:' + CHALLENGE_STOPS[i][1] + '%"><button class="challenge-pin' +
+      (result?.p && !locked ? ' passed' : '') + '" data-challenge-stop="' + key + '" type="button" aria-haspopup="dialog"' +
+      (current ? ' aria-current="step"' : '') + ' aria-label="' + MK[key].name +
+      (locked ? ', locked' : result?.p ? ', passed' : '') + '"><span class="challenge-medal" aria-hidden="true">' + icon +
+      '</span><span class="challenge-map-label">' + labels[i] + '</span></button></li>';
   }).join("");
-  return '<section class="challenge" aria-labelledby="challenge-title"><header class="challenge-hero">' +
-    '<h2 id="challenge-title">Citizenship Challenge</h2><p>' + passed + ' of ' + MK_KEYS.length + ' tests passed</p>' +
-    '<div class="challenge-progress" aria-hidden="true">' + progress + '</div></header>' +
-    '<ol class="challenge-trail" aria-label="Test stages">' + stages + '</ol>' +
+  return '<section class="challenge" aria-labelledby="challenge-title"><header class="challenge-head">' +
+    '<h2 id="challenge-title">Citizenship Challenge</h2><p>' + passed + ' of ' + MK_KEYS.length + ' tests passed</p></header>' +
+    '<ol class="challenge-map" aria-label="Test stages">' + stages + mascot + '</ol><div class="challenge-bottom">' +
     '<button class="mkres' + (resultsReady ? " open" : "") + '" data-mkres type="button"' + (resultsReady ? "" : " disabled") + '>' +
     (resultsReady ? "" : LOCK_SVG) + 'Results</button>' +
-    (resultsReady ? "" : '<p class="mknote">Complete all 4 tests to unlock your result.</p>') + '</section>';
+    (resultsReady ? "" : '<p class="mknote">Complete all 4 tests to unlock your result.</p>') + '</div>' +
+    '<dialog id="challengeDetails" class="challenge-details" aria-labelledby="challenge-stop-title"></dialog></section>';
+}
+function showChallengeStop(key){
+  const i = MK_KEYS.indexOf(key);
+  if (i < 0) return;
+  const detail = [
+    "Answer questions out loud in English.",
+    "Read English sentences out loud.",
+    "Listen to English sentences and type what you hear.",
+    "Practice questions about U.S. history and government."
+  ][i];
+  const open = mkOpen(key), result = S.mock[key];
+  const status = !open ? "Pass " + MK[MK_KEYS[i - 1]].name + " first."
+    : result ? (result.p ? "Passed: " : "Last score: ") + result.pct + "%" : "";
+  const dialog = $("challengeDetails");
+  dialog.innerHTML = '<h3 id="challenge-stop-title">' + MK[key].name + '</h3><p>' + detail + '</p>' +
+    (status ? '<p>' + status + '</p>' : '') + (open ? '<button class="btn" data-mk="' + key +
+    '" type="button">' + (result ? "Try again" : "Start test") + '</button>' : '') +
+    '<form method="dialog"><button class="btn ghost">Back to map</button></form>';
+  dialog.showModal();
 }
 function mkReview(){
   const w = R.mock === "writing" ? "wrote" : "said";
@@ -1923,7 +1981,10 @@ function showFinal(){
   $("fHome").onclick = () => { $("res").hidden = true; go("learn"); };
 }
 document.addEventListener("click", e => {
-  const b = e.target.closest("[data-mk]"); if (b){ sfx.tap(); startMock(b.dataset.mk); return; }
+  const stop = e.target.closest("[data-challenge-stop]");
+  if (stop){ sfx.tap(); showChallengeStop(stop.dataset.challengeStop); return; }
+  const b = e.target.closest("[data-mk]");
+  if (b){ b.closest("dialog")?.close(); sfx.tap(); startMock(b.dataset.mk); return; }
   const r = e.target.closest("[data-mkres]"); if (r && !r.disabled){ sfx.tap(); showFinal(); }
 });
 function finish(){
