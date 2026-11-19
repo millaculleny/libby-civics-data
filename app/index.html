@@ -587,6 +587,19 @@ body.onhome #app{max-width:1000px}
 .upath{position:relative;margin:6px 0 0}
 .upath .conn{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .upath .conn path{fill:none;stroke:var(--mute);stroke-opacity:.45;stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round;vector-effect:non-scaling-stroke}
+.adventure{margin:22px 0 14px}
+.adventure h2{margin:0 0 4px;font-size:24px}
+.adventure p{margin:0 0 12px;color:var(--mute)}
+.adventure-road{position:relative;height:clamp(1650px,225vw,1800px);border-radius:24px;background:#526b31 url("assets/adventure-road.webp") center/100% 100% no-repeat;box-shadow:inset 0 0 0 1px #172b4233}
+.adventure-road .unode{width:46px;height:46px;transform:translate(-50%,-50%);border:2px solid #fff9;border-bottom-width:4px;font-size:16px;font-weight:900;line-height:1;background:#234979;box-shadow:0 3px 9px #151d36aa}
+.adventure-road .unode:active{transform:translate(-50%,-45%)}
+.adventure-road .unode.done{background:#173e37;color:#fff}
+.adventure-road .unode.locked{background:#35445a;color:#fff}
+.adventure-road .unode.cur{background:#1254aa;outline:3px solid #fff;outline-offset:3px;animation:none;z-index:3}
+.adventure-road .unode:focus-visible{outline:3px solid #9cf3ff;outline-offset:3px;z-index:4}
+.adventure-position{position:absolute;top:100%;margin-top:7px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#fff;background:#17304d;padding:5px 8px;border-radius:20px;font-size:11px;pointer-events:none}
+.adventure-units{margin:0 0 18px}
+.adventure-units summary{cursor:pointer;padding:10px 0;font-weight:800}
 .unode{position:absolute;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;border-bottom:7px solid rgba(0,0,0,.2);transition:transform .1s}
 .unode:active{transform:translateY(5px);border-bottom-width:2px}
 .unode svg{width:38px;height:38px}
@@ -1260,6 +1273,27 @@ function vLearn(){
   let h = '<div class="hero2"><div class="m bob">' + M() + '</div><div class="hbody"><h2>Hi, ' + (S.name ? esc(S.name) : "there") + '!</h2><p>' + tm + ' of 128 questions mastered</p><div class="meter"><i style="width:' + Math.max(4, pct) + '%"></i></div><span class="pill">' + IC.star + ' Level ' + level() + ' · ' + STAGE_DEF[si][1] + '</span></div></div>';
   h += '<div class="stages" aria-label="Libby\'s stages">' + STAGE_DEF.map((s, i) => i === 0 ? "" : '<div class="stg ' + (i === si ? "cur" : i < si ? "past" : "fut") + '"><span class="sc"><img src="' + IMG[s[0]] + '" alt=""></span><b>' + s[2] + '</b></div>').join("") + '</div>';
   h += '<button class="mock" id="goMock" type="button"><b>Take the simulado</b><span>Speak your answers like the real test</span></button>';
+  // Map coordinates are percentages measured on adventure-road.webp, from dirt to gold.
+  const checkpoints = [[46,94],[40,88],[50,82],[41,76],[52,70],
+    [63,64],[71,59],[58,55],[53,50],[41,46],
+    [27,41],[39,37],[48,33],[61,30],[62,26],
+    [56,23],[42,20.5],[36,17.8],[46,15.1],[51,12.2]];
+  const materials = ["Dirt", "Asphalt", "Silver", "Gold"];
+  const currentLabel = nextId < 0 ? "Trail complete" : "You are here";
+  h += '<section class="adventure" aria-labelledby="adventureTitle"><h2 id="adventureTitle">Liberty Adventure</h2>' +
+    '<p>Dirt &#8594; Asphalt &#8594; Silver &#8594; Gold</p><div class="adventure-road">';
+  UNITS.forEach(u => u.lessons.forEach(L => {
+    const full = isDone(L), open = lessonOpen(L), cur = L.id === nextId;
+    const here = cur || (nextId < 0 && L.id === LESSONS.length - 1);
+    const st = cur ? "cur" : full ? "done" : open ? "open" : "locked";
+    const [x, y] = checkpoints[L.id];
+    const label = "Level " + (L.id + 1) + ", " + materials[Math.floor(L.id / 5)] + ", " + u.name +
+      (full ? ", mastered" : open ? "" : ", locked") + (here ? ", " + currentLabel : "");
+    h += '<button class="unode ' + st + '" data-l="' + L.id + '" type="button" style="left:' + x +
+      '%;top:' + y + '%" aria-label="' + esc(label) + '"' + (cur ? ' aria-current="step"' : "") + '>' +
+      (L.id + 1) + (here ? '<span class="adventure-position" aria-hidden="true">' + currentLabel + "</span>" : "") + "</button>";
+  }));
+  h += '</div></section><details class="adventure-units"><summary>Browse levels by unit</summary>';
   UNITS.forEach((u, ui) => {
     const done = u.qs.filter(q => S.q[q.n] && S.q[q.n].last === "c").length, n = u.lessons.length, H = 128, W = 100;
     h += '<div class="ubanner" style="background:' + u.color + '"><span><small>UNIT ' + (ui + 1) + '</small>' + esc(u.name) + '</span><b>' + done + "/" + u.qs.length + '</b></div>';
@@ -1276,6 +1310,7 @@ function vLearn(){
     });
     h += "</div>";
   });
+  h += "</details>";
   h += '<footer class="fine"><div>Unofficial practice tool, not affiliated with USCIS. Questions and answers come from the USCIS document 128 Civics Questions and Answers (2025 version), M-1778 (09/25). The 2025 test applies to people who file Form N-400 on or after October 20, 2025.</div><div><a href="https://www.uscis.gov/citizenship-resource-center/naturalization-test-and-study-resources/2025-civics-test" target="_blank" rel="noopener">Official 2025 civics test page</a></div></footer>';
   $("view").innerHTML = h;
   const nn = document.querySelector(".unode.cur"); if (nn && !window._scrolled){ window._scrolled = 1; setTimeout(() => nn.scrollIntoView({block: "center", behavior: "smooth"}), 150); }
@@ -1429,43 +1464,73 @@ const shapeOf = a => /^\d+$/.test(a) ? "num" : /^[A-Z][A-Za-z.’'\-]*( [A-Z][A-
 const qTok = s => new Set(String(s).toLowerCase().replace(/[^a-z0-9 ]+/g, " ").split(/\s+/).filter(w => w.length > 3));
 const jacc = (a, b) => { let i = 0; a.forEach(x => b.has(x) && i++); return i / (a.size + b.size - i || 1); };
 const QINFO = QS.map(q => ({q, tk: qTok(q.q), ans: q.a.map(cleanAns).filter(a => a && a.length <= 62)}));
-function pack(correct, wrong){ const o = shuffle([{t: correct, ok: true}].concat(wrong.map(t => ({t, ok: false})))); return {opts: o}; }
+function pack(correct, wrong){
+  const answer = normalizeLabel(correct);
+  if (!answer) return null;
+  const seen = new Set([answer.toLowerCase()]);
+  const opts = [{t: answer, ok: true}];
+  for (const value of wrong){
+    const t = normalizeLabel(value), key = t.toLowerCase();
+    if (!t || seen.has(key)) continue;
+    seen.add(key);
+    opts.push({t, ok: false});
+    if (opts.length === 4) return {opts: shuffle(opts)};
+  }
+  return null;
+}
 const uniq = a => [...new Set(a)];
 
 /* ---------- curated wrong options: easy while Libby is a baby, trickier as she grows ---------- */
 let HARD = false;   /* Challenge Mode always uses the trickiest wrong options */
 const distTier = () => { if (HARD || (R && R.hard)) return "t"; const i = stageIdx(); return i <= 1 ? "b" : i === 2 ? "k" : "t"; };
-const noParen = s => String(s).replace(/\s*\([^)]*\)\s*$/, "").trim();
-function curated(q, correct, strip, extra){
+function normalizeLabel(value){
+  const original = cleanAns(String(value));
+  const expanded = original.replace(/you don.t have to pay \(a poll tax\)/i, "You do not have to pay a poll tax")
+    .replace(/\(can vote\)/gi, "can vote")
+    .replace(/\(in the U\.S\. military\)/gi, "in the U.S. military")
+    .replace(/end of \(during\) the Korean War/i, "end of the Korean War");
+  const text = expanded.replace(/\s*\([^)]*\)/g, "").replace(/[()]/g, "").replace(/\s+/g, " ").trim()
+    || expanded.replace(/[()]/g, "").trim();
+  const numbers = {"twenty-seven":27, "twenty-six":26, "twenty-five":25, "fifty-two":52, fifty:50,
+    "one hundred":100, "four hundred thirty-five":435, one:1, two:2, three:3, four:4, five:5,
+    six:6, seven:7, eight:8, nine:9, ten:10, thirteen:13};
+  return Object.hasOwn(numbers, text.toLowerCase()) ? String(numbers[text.toLowerCase()]) : text;
+}
+function curated(q, correct, extra = []){
   const d = DIST[q.n]; if (!d) return null;
-  const mine = new Set(q.a.map(a => cleanAns(a).toLowerCase()).concat([String(correct).toLowerCase()], (extra || []).map(a => String(a).toLowerCase())));
-  const accepted = (q.need || 1) > 1 ? q.a.map(a => cleanAns(a).toLowerCase()).filter(a => a.length > 2) : [];
-  /* "name two/three" questions: a wrong option may not contain ANY accepted answer (no half-right options) */
-  const ok = a => !mine.has(a.toLowerCase()) && !accepted.some(x => a.toLowerCase().includes(x));
-  let L = (d[distTier()] || []).map(a => strip ? noParen(a) : a).filter(ok);
-  if (L.length < 3) L = L.concat([].concat(d.k || [], d.b || [], d.t || []).map(a => strip ? noParen(a) : a).filter(a => ok(a) && !L.includes(a)));
-  L = uniq(L); return L.length >= 3 ? L.slice(0, 3) : null;
+  const accepted = q.a.map(a => normalizeLabel(a).toLowerCase()).filter(Boolean);
+  const seen = new Set(accepted.concat([normalizeLabel(correct).toLowerCase()],
+    extra.map(a => normalizeLabel(a).toLowerCase())));
+  const wrong = [];
+  for (const option of [].concat(d[distTier()] || [], d.k || [], d.b || [], d.t || [])){
+    const text = normalizeLabel(option), key = text.toLowerCase();
+    if (!key || seen.has(key) || ((q.need || 1) > 1 && accepted.some(a => a.length > 2 && key.includes(a)))) continue;
+    seen.add(key);
+    wrong.push(text);
+    if (wrong.length === 3) return wrong;
+  }
+  return null;
 }
 function dynChoices(q){
   const k = kind(), st = S.state;
   const govs = () => Object.entries(OFF.states).filter(([n]) => n !== st).map(([, v]) => v.governor).filter(Boolean);
   if (FED[q.n]){
     const c = OFF.federal[FED[q.n][0]]; if (!c) return null;
-    const cur = curated(q, c, true); if (cur) return pack(c, cur);
+    const cur = curated(q, c); if (cur) return pack(c, cur);
     const pool = uniq(Object.values(OFF.federal).filter(x => x !== c).concat(shuffle(govs()).slice(0, 8)));
-    return pack(c, shuffle(pool).slice(0, 3));
+    return pack(c, shuffle(pool));
   }
-  if (q.n === 61 && k === "state" && OFF.states[st] && OFF.states[st].governor){ const g = OFF.states[st].governor; return pack(g, curated(q, g, true, [g]) || shuffle(uniq(govs())).slice(0, 3)); }
+  if (q.n === 61 && k === "state" && OFF.states[st] && OFF.states[st].governor){ const g = OFF.states[st].governor; return pack(g, curated(q, g, [g]) || shuffle(uniq(govs()))); }
   if (q.n === 23 && k === "state" && OFF.states[st]){
     const mine = OFF.states[st].senators; if (!mine.length) return null;
     const others = uniq(Object.entries(OFF.states).filter(([n]) => n !== st).flatMap(([, v]) => v.senators));
     const c0 = shuffle(mine)[0];   /* both of my senators are right answers, so neither may appear as a wrong option */
-    return pack(c0, curated(q, c0, true, mine) || shuffle(others).slice(0, 3));
+    return pack(c0, curated(q, c0, mine) || shuffle(others));
   }
   if (q.n === 62 && (k === "state" || k === "terr")){
     const c = k === "terr" ? TERRITORIES[st] : CAPITALS[st];
     const others = Object.values(CAPITALS).filter(x => x !== c);
-    return pack(c, curated(q, c, true, [c]) || shuffle(others).slice(0, 3));
+    return pack(c, curated(q, c, [c]) || shuffle(others));
   }
   return null;
 }
@@ -1474,14 +1539,14 @@ const NOT_DISTRACTORS = new Set(["commander in chief (of the military)"]);   /* 
 function choicesFor(q){
   if ([23,29,30,38,39,57,61,62].includes(q.n)) return dynChoices(q);
   const info = QINFO.find(x => x.q.n === q.n); if (!info) return null;
-  const mine = info.ans; if (!mine.length) return null;
+  const mine = uniq(info.ans.map(normalizeLabel).filter(Boolean)); if (!mine.length) return null;
   const mineTok = new Set(mine.flatMap(a => toks(a)));
   if ((q.need || 1) > 3) return null;   /* "name five": too long for a multiple-choice option, answered by voice or flip card */
   const many = (q.need || 1) > 1;
   const picks = many ? shuffle(mine).slice(0, q.need) : [shuffle(mine)[0]];
   if (picks.length < (q.need || 1)) return null;
   const correct = picks.join(" and ");
-  const cur = curated(q, correct, false); if (cur) return pack(correct, cur);
+  const cur = curated(q, correct); if (cur) return pack(correct, cur);
   const sh = shapeOf(picks[0]), fam = famOf(q);
   /* tier 1: same kind of question and same part of the test; tier 2: same kind of question; tier 3: any question with a similar answer shape */
   const tiers = [new Map(), new Map(), new Map(), new Map()];
@@ -1490,8 +1555,9 @@ function choicesFor(q){
     const sameFam = famOf(o.q) === fam, sameSec = o.q.s === q.s;
     const sim = jacc(info.tk, o.tk);
     if (sim >= 0.2 && !(sim < 0.3 && !sameFam)) return;
-    o.ans.forEach(a => {
-      if (a.toLowerCase() === correct.toLowerCase() || NOT_DISTRACTORS.has(a.toLowerCase())) return;
+    o.ans.forEach(raw => {
+      const a = normalizeLabel(raw);
+      if (!a || NOT_DISTRACTORS.has(raw.toLowerCase()) || mine.some(answer => answer.toLowerCase() === a.toLowerCase())) return;
       const t = toks(a); if (!t.length || t.some(x => mineTok.has(x))) return;
       if (shapeOf(a) !== sh && !(sameFam && sameSec && fam !== "name")) return;
       const k = a.toLowerCase();
