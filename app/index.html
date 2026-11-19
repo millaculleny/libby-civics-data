@@ -314,7 +314,7 @@ footer.fine a{color:inherit}
 /* hero + stages */
 .hero2{display:flex;gap:6px;align-items:center;background:var(--card);border-radius:26px;box-shadow:var(--lift);padding:16px 18px 16px 8px;margin-bottom:16px}
 .hero2 .m{width:132px;height:132px;flex:none}
-.hero2 .m .mascot,.pc .m .mascot,.sit .mascot,.ppmascot .mascot,.full .big .mascot{width:100%;height:100%;object-fit:contain}
+.hero2 .m .mascot,.pc .m .mascot,.ppmascot .mascot,.full .big .mascot{width:100%;height:100%;object-fit:contain}
 .hbody{flex:1;min-width:0}
 .hbody h2{font-size:26px;font-weight:900;line-height:1.1}
 .hbody p{color:var(--mute);font-size:14px;margin-top:4px}
@@ -579,23 +579,15 @@ body.onhome #app{max-width:1000px}
 .mock{display:block;text-align:center;width:100%;background:var(--navy);color:#fff;border-radius:20px;padding:16px;border-bottom:6px solid var(--navy-d);margin-bottom:6px}
 .mock b{font-size:21px;font-weight:900}
 .mock span{display:block;font-size:14px;opacity:.85;margin-top:2px}
-.ubanner{display:flex;justify-content:space-between;align-items:center;gap:10px;border-radius:18px;padding:14px 18px;color:#fff;margin:24px 0 6px;border-bottom:5px solid rgba(0,0,0,.2)}
-.ubanner small{display:block;font-size:12px;font-weight:900;letter-spacing:.08em;opacity:.9}
-.ubanner span{font-size:17px;font-weight:900;line-height:1.2}
-.ubanner b{font-size:15px;font-weight:900;opacity:.95}
-/* path */
-.upath{position:relative;margin:6px 0 0}
-.upath .conn{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.upath .conn path{fill:none;stroke:var(--mute);stroke-opacity:.45;stroke-width:3;stroke-dasharray:2 7;stroke-linecap:round;vector-effect:non-scaling-stroke}
 .adventure{margin:22px 0 14px}
 .adventure h2{margin:0 0 4px;font-size:24px}
 .adventure p{margin:0 0 12px;color:var(--mute)}
 .adventure-road{position:relative;height:clamp(1650px,225vw,1800px);border-radius:24px;background:#526b31 url("assets/adventure-road.webp") center/100% 100% no-repeat;box-shadow:inset 0 0 0 1px #172b4233}
-.adventure-road .unode{width:46px;height:46px;transform:translate(-50%,-50%);border:2px solid #fff9;border-bottom-width:4px;font-size:16px;font-weight:900;line-height:1;background:#234979;box-shadow:0 3px 9px #151d36aa}
+.adventure-road .unode{position:absolute;display:grid;place-items:center;border-radius:50%;color:#fff;transition:transform .1s;width:46px;height:46px;transform:translate(-50%,-50%);border:2px solid #fff9;border-bottom-width:4px;font-size:16px;font-weight:900;line-height:1;background:#234979;box-shadow:0 3px 9px #151d36aa}
 .adventure-road .unode:active{transform:translate(-50%,-45%)}
 .adventure-road .unode.done{background:#173e37;color:#a6f48b}
 .adventure-road .unode.locked{background:#35445a;color:#fff}
-.adventure-road .unode.cur{background:#1254aa;outline:3px solid #fff;outline-offset:3px;animation:none;z-index:3}
+.adventure-road .unode.cur{background:#1254aa;outline:3px solid #fff;outline-offset:3px;box-shadow:0 0 0 10px #2f6bff33,0 0 34px #2f6bff8c;z-index:3}
 .adventure-road .unode:focus-visible{outline:3px solid #9cf3ff;outline-offset:3px;z-index:4}
 .adventure-eagle{position:absolute;z-index:2;width:clamp(64px,23vw,108px);transform:translate(-50%,calc(-100% - 12px));pointer-events:none;filter:drop-shadow(0 5px 6px #19272b88)}
 .adventure-eagle img{display:block;width:100%;height:auto}
@@ -604,22 +596,6 @@ body.onhome #app{max-width:1000px}
 .adventure-eagle[data-stage="2"]{width:clamp(57px,20vw,85px)}
 .adventure-eagle[data-stage="3"]{width:clamp(62px,22vw,94px)}
 .adventure-position{position:absolute;top:100%;margin-top:7px;left:50%;transform:translateX(-50%);white-space:nowrap;color:#fff;background:#17304d;padding:5px 8px;border-radius:20px;font-size:11px;pointer-events:none}
-.adventure-units{margin:0 0 18px}
-.adventure-units summary{cursor:pointer;padding:10px 0;font-weight:800}
-.unode{position:absolute;width:84px;height:84px;border-radius:50%;display:grid;place-items:center;color:#fff;border-bottom:7px solid rgba(0,0,0,.2);transition:transform .1s}
-.unode:active{transform:translateY(5px);border-bottom-width:2px}
-.unode svg{width:38px;height:38px}
-.unode .lbl{position:absolute;top:100%;margin-top:8px;left:50%;transform:translateX(-50%);white-space:nowrap;font-size:15px;font-weight:900;color:var(--ink)}
-.unode.done{background:linear-gradient(#f9d36b,#e6a92b)}
-.unode.done svg{color:#fff;filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-.unode.open{background:var(--blue)}
-.unode.cur{background:var(--blue);box-shadow:0 0 0 10px rgba(47,107,255,.2),0 0 34px rgba(47,107,255,.55);animation:pulse 1.8s ease-in-out infinite}
-.unode.locked{background:#d9dde8;color:#9aa3b8;border-bottom-color:#c3c9d8}
-.unode.locked .lbl{color:var(--mute)}
-:root[data-theme="dark"] .unode.locked{background:#2b3a6e;color:#7e8dbb;border-bottom-color:#212e5a}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .unode.locked{background:#2b3a6e;color:#7e8dbb;border-bottom-color:#212e5a}}
-.unode .sit{position:absolute;bottom:62px;left:50%;width:84px;height:84px;margin-left:-42px;pointer-events:none;animation:bob 2.6s ease-in-out infinite}
-.unode.cur{z-index:2}
 /* toast */
 #toast{position:fixed;left:50%;bottom:110px;transform:translate(-50%,20px);background:var(--navy);color:#fff;padding:12px 18px;border-radius:14px;font-weight:800;font-size:15px;opacity:0;pointer-events:none;transition:all .25s;z-index:60;max-width:88vw;text-align:center}
 #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -1329,24 +1305,7 @@ function vLearn(){
   }));
   h += '<div class="adventure-eagle" aria-hidden="true" data-stage="' + markerStage +
     '" style="left:' + markerX + '%;top:' + markerY + '%">' + mascotImg(STAGE_DEF[markerStage][0]) + '</div>';
-  h += '</div></section><details class="adventure-units"><summary>Browse levels by unit</summary>';
-  UNITS.forEach((u, ui) => {
-    const done = u.qs.filter(q => S.q[q.n] && S.q[q.n].last === "c").length, n = u.lessons.length, H = 128, W = 100;
-    h += '<div class="ubanner" style="background:' + u.color + '"><span><small>UNIT ' + (ui + 1) + '</small>' + esc(u.name) + '</span><b>' + done + "/" + u.qs.length + '</b></div>';
-    const xs = i => i % 2 === 0 ? 27 : 70, cy = i => i * H + 50 + 58;
-    let svg = '<svg class="conn" viewBox="0 0 ' + W + " " + (n * H + 14 + 58) + '" preserveAspectRatio="none" aria-hidden="true">';
-    for (let i = 0; i < n - 1; i++) svg += '<path d="M' + xs(i) + " " + cy(i) + " C" + xs(i) + " " + (cy(i) + H * 0.55) + " " + xs(i + 1) + " " + (cy(i + 1) - H * 0.55) + " " + xs(i + 1) + " " + cy(i + 1) + '"/>';
-    svg += "</svg>";
-    h += '<div class="upath" style="height:' + (n * H + 14 + 58) + 'px">' + svg;
-    u.lessons.forEach((L, i) => {
-      const open = lessonOpen(L), full = open && isDone(L), cur = L.id === nextId;
-      const st = full ? "done" : open ? (cur ? "cur" : "open") : "locked";
-      h += '<button class="unode ' + st + '" data-l="' + L.id + '" type="button" style="left:calc(' + xs(i) + '% - 42px);top:' + (i * H + 8 + 58) + 'px" aria-label="Level ' + (L.id + 1) + ", " + esc(u.name) + (full ? ", mastered" : !open ? ", locked" : "") + '">' +
-        (cur ? '<span class="sit">' + M() + "</span>" : "") + (full ? IC.check : open ? IC.star : LOCK) + '<span class="lbl">Level ' + (L.id + 1) + "</span></button>";
-    });
-    h += "</div>";
-  });
-  h += "</details>";
+  h += '</div></section>';
   h += '<footer class="fine"><div>Unofficial practice tool, not affiliated with USCIS. Questions and answers come from the USCIS document 128 Civics Questions and Answers (2025 version), M-1778 (09/25). The 2025 test applies to people who file Form N-400 on or after October 20, 2025.</div><div><a href="https://www.uscis.gov/citizenship-resource-center/naturalization-test-and-study-resources/2025-civics-test" target="_blank" rel="noopener">Official 2025 civics test page</a></div></footer>';
   $("view").innerHTML = h;
   const nn = document.querySelector('.adventure-road [data-l="' + markerId + '"]');
